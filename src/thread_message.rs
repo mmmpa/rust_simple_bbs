@@ -2,6 +2,7 @@ use crate::message_arrangement::MessageArrangement;
 
 #[derive(Debug)]
 pub struct ThreadMessage {
+    pub index: usize,
     pub raw: String,
     pub html: String,
     pub single_anchors: Vec<usize>,
@@ -9,18 +10,19 @@ pub struct ThreadMessage {
 }
 
 impl ThreadMessage {
-    fn new(raw: String) -> ThreadMessage {
+    pub fn new(raw: &str) -> ThreadMessage {
         ThreadMessage {
-            raw,
+            raw: raw.to_string(),
             ..ThreadMessage::default()
         }
     }
     pub fn retrieve(index: usize, raw: String, html: String, single_anchors: Vec<usize>, range_anchors: Vec<(usize, usize)>) -> ThreadMessage {
-        ThreadMessage { raw, html, single_anchors, range_anchors }
+        ThreadMessage { index, raw, html, single_anchors, range_anchors }
     }
 
     fn default() -> ThreadMessage {
         ThreadMessage {
+            index: 0,
             raw: String::new(),
             html: String::new(),
             single_anchors: vec![],
@@ -31,7 +33,7 @@ impl ThreadMessage {
     fn from_raw(raw: String) -> Result<ThreadMessage, String> {
         let (html, single_anchors, range_anchors) = MessageArrangement::execute(&raw)?;
 
-        Ok(ThreadMessage { raw, html, single_anchors, range_anchors })
+        Ok(ThreadMessage { raw, html, single_anchors, range_anchors, ..ThreadMessage::default() })
     }
 }
 

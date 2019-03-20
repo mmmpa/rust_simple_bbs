@@ -4,14 +4,14 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::data_gateway_adapter::{RawThread, DataGatewayAdapter, RawMessage, MessageCreationParams, ThreadCreationParams, RawBoard, BoardCreationParams, RawThreadInformation};
 use std::fs::File;
-use std::io::{BufReader, BufRead, BufWriter, Read, Seek};
+use std::io::{BufReader, BufRead};
 use std::path::Path;
 use std::io::Write;
 use std::ops::Range;
 use std::fs::OpenOptions;
 use std::time::SystemTime;
 use std::fs;
-use std::mem::{swap, replace};
+use std::mem::{replace};
 
 pub struct TestAdapter {
     logs_root_path: String,
@@ -24,7 +24,7 @@ impl TestAdapter {
         if Path::new(&logs_root_path).exists() {
             //
         } else {
-            fs::create_dir(&logs_root_path);
+            fs::create_dir(&logs_root_path).expect("test adapter initialize error");
         }
 
         TestAdapter {
@@ -83,8 +83,8 @@ impl TestAdapter {
 
     fn read_board_schema(&self, board_id: &str) -> Result<BoardSchema, String> {
         let path = self.generate_board_info_path(board_id);
-        let mut json = fs::read_to_string(path).expect("broken info file");
-        let mut schema: BoardSchema = serde_json::from_str(&json).unwrap();
+        let json = fs::read_to_string(path).expect("broken info file");
+        let schema: BoardSchema = serde_json::from_str(&json).unwrap();
 
         Ok(schema)
     }
@@ -92,30 +92,34 @@ impl TestAdapter {
     fn write_board_schema(&self, schema: &BoardSchema) -> Result<(), String> {
         let path = self.generate_board_info_path(&schema.board_id);
         let board_json = serde_json::to_string(&schema).expect("parse error");
-        fs::write(path, board_json);
+        fs::write(path, board_json).expect("board schema write error");
 
         Ok(())
     }
 
-    fn params_to_row(message: &MessageCreationParams) -> String {
-        format!(
-            "{}<>{}<>{}<>{}\n",
-            Self::san(message.raw),
-            Self::san(message.html),
-            message.single_anchors.iter().map(|n| format!("{}", n)).collect::<Vec<String>>().connect(","),
-            message.range_anchors.iter().map(|(h, e)| format!("{}-{}", h, e)).collect::<Vec<String>>().connect(","),
-        )
+    fn params_to_row(message: &MessageCreationParams) -> Result<String, String> {
+        let message = MessageRow {
+            raw: Self::san(message.raw),
+            html: Self::san(message.html),
+            single_anchors: message.single_anchors.iter().map(|n| format!("{}", n)).collect::<Vec<String>>().join(","),
+            range_anchors: message.range_anchors.iter().map(|(h, e)| format!("{}-{}", h, e)).collect::<Vec<String>>().join(","),
+        };
+        let json = serde_json::to_string(&message).expect("parse error");
+
+        Ok(format!("{}\n", json))
     }
 
-    fn row_to_raw(index: usize, raw: &str) -> RawMessage {
-        let row = raw.split("<>").collect::<Vec<&str>>();
-        RawMessage {
+    fn row_to_raw(index: usize, raw: &str) -> Result<RawMessage, String> {
+        let mut message: MessageRow = serde_json::from_str(raw).expect("parse error");
+        let raw = RawMessage {
             index,
-            raw: (&row[0]).to_string(),
-            html: (&row[1]).to_string(),
+            raw: swap_string(&mut message.raw),
+            html: swap_string(&mut message.html),
             single_anchors: vec![],
             range_anchors: vec![],
-        }
+        };
+
+        Ok(raw)
     }
 
     fn san(string: &str) -> String {
@@ -140,6 +144,14 @@ impl Drop for TestAdapter {
             fs::remove_dir_all(&self.logs_root_path).unwrap();
         }
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct MessageRow {
+    pub raw: String,
+    pub html: String,
+    pub single_anchors: String,
+    pub range_anchors: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -189,6 +201,8 @@ impl DataGatewayAdapter for TestAdapter {
           .take(range.end - range.start)
           .map(|(i, line)| (i, line.unwrap()))
           .map(|(i, line)| Self::row_to_raw(i, &line))
+          .filter(|row| row.is_ok())
+          .map(|row| row.unwrap())
           .collect();
 
         Ok(RawThread { title, messages })
@@ -219,10 +233,10 @@ impl DataGatewayAdapter for TestAdapter {
           .expect("thread open error");
 
         let title = Self::san(params.title);
-        let first_row = Self::params_to_row(&params.first_message);
+        let first_row = Self::params_to_row(&params.first_message)?;
 
         write!(thread, "{}", format!("{}\n{}", title, first_row)).unwrap();
-        self.register_thread(params.board_id, &new_thread_id, params.title);
+        self.register_thread(params.board_id, &new_thread_id, params.title).expect("registration error");
 
         Ok(new_thread_id)
     }
@@ -232,9 +246,9 @@ impl DataGatewayAdapter for TestAdapter {
         let mut thread = OpenOptions::new().append(true).open(path)
           .expect("thread open error");
 
-        let row = Self::params_to_row(&params);
+        let row = Self::params_to_row(&params)?;
 
-        let result = write!(thread, "{}", row)
+        write!(thread, "{}", row)
           .expect("message write error");
 
         Ok(params.board_thread_id.to_string())
@@ -244,12 +258,11 @@ impl DataGatewayAdapter for TestAdapter {
 #[cfg(test)]
 mod tests {
     use crate::test_adapter::TestAdapter;
-    use crate::data_gateway::DataGateway;
     use crate::data_gateway_adapter::{DataGatewayAdapter, MessageCreationParams, ThreadCreationParams, BoardCreationParams, RawThreadInformation, RawThread};
 
     #[test]
     fn test_create_board() {
-        let adapter = &TestAdapter::new("test_create_board", false);
+        let adapter = &TestAdapter::new("test_create_board", true);
         let board_id = &adapter.create_board(BoardCreationParams { title: "test_create_board" }).unwrap();
         let raw_board = adapter.show_board(board_id).unwrap();
 
@@ -258,7 +271,7 @@ mod tests {
 
     #[test]
     fn test_create_thread() {
-        let adapter = &TestAdapter::new("test_create_thread", false);
+        let adapter = &TestAdapter::new("test_create_thread", true);
         let board_id = &adapter.create_board(BoardCreationParams { title: "test_create_thread" }).unwrap();
         let board_thread_id_1 = adapter.create_thread(
             ThreadCreationParams {
@@ -305,6 +318,7 @@ mod tests {
         assert_eq!(messages[0].raw, "raw1");
 
         let RawThread { title, messages } = adapter.show_thread(&board_id, &board_thread_id_2, 0..100).unwrap();
+        assert_eq!(title, "test_create_thread_2");
         assert_eq!(messages[0].raw, "raw2");
     }
 
@@ -361,4 +375,3 @@ mod tests {
         assert_eq!(messages[0].raw, "message_2");
     }
 }
-
