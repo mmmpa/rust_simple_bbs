@@ -39,6 +39,18 @@ struct BoardSchema {
     threads: Vec<ThreadSchema>,
 }
 
+impl Drop for TestAdapter {
+    fn drop(&mut self) {
+        if self.auto_sweeping {
+            fs::remove_dir_all(&self.logs_root_path).unwrap();
+        }
+    }
+}
+
+fn swap_string(a: &mut String) -> String {
+    replace(a, String::new())
+}
+
 impl TestAdapter {
     pub fn new(path: &str, auto_sweeping: bool) -> TestAdapter {
         let logs_root_path = format!("./tmp/{}", path);
@@ -156,22 +168,8 @@ impl TestAdapter {
         let t = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap();
         format!("{:?}_{}", t, Uuid::new_v4().to_string())
     }
-}
 
-impl Drop for TestAdapter {
-    fn drop(&mut self) {
-        if self.auto_sweeping {
-            fs::remove_dir_all(&self.logs_root_path).unwrap();
-        }
-    }
-}
-
-fn swap_string(a: &mut String) -> String {
-    replace(a, String::new())
-}
-
-impl DataGatewayAdapter for TestAdapter {
-    fn show_board(&self, board_id: &str) -> Result<RawBoard, String> {
+    pub fn show_board(&self, board_id: &str) -> Result<RawBoard, String> {
         let mut board = self.read_board_schema(board_id)?;
 
         Ok(
@@ -184,7 +182,7 @@ impl DataGatewayAdapter for TestAdapter {
         )
     }
 
-    fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, String> {
+    pub fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, String> {
         let path = self.check_thread_log_path(board_id, thread_id, true)?;
         let thread = File::open(path)
           .expect("unknown error");
@@ -211,7 +209,7 @@ impl DataGatewayAdapter for TestAdapter {
         Ok(RawThread { locked, title, messages })
     }
 
-    fn create_board(&self, params: BoardCreationParams) -> Result<String, String> {
+    pub fn create_board(&mut self, params: BoardCreationParams) -> Result<String, String> {
         let board_id = Self::generate_id();
         let schema = BoardSchema {
             board_id: board_id.clone(),
@@ -228,7 +226,7 @@ impl DataGatewayAdapter for TestAdapter {
         Ok(board_id)
     }
 
-    fn create_thread(&self, params: ThreadCreationParams) -> Result<String, String> {
+    pub fn create_thread(&mut self, params: ThreadCreationParams) -> Result<String, String> {
         let new_thread_id = Self::generate_id();
 
         let path = self.check_thread_log_path(params.board_id, &new_thread_id, false)?;
@@ -244,7 +242,7 @@ impl DataGatewayAdapter for TestAdapter {
         Ok(new_thread_id)
     }
 
-    fn create_message(&self, params: MessageCreationParams) -> Result<String, String> {
+    pub fn create_message(&mut self, params: MessageCreationParams) -> Result<String, String> {
         let path = self.check_thread_log_path(params.board_id, params.board_thread_id, true)?;
         let mut thread = OpenOptions::new().read(true).append(true).open(path)
           .expect("thread open error");
@@ -267,7 +265,7 @@ impl DataGatewayAdapter for TestAdapter {
         Ok(params.board_thread_id.to_string())
     }
 
-    fn lock_thread(&self, board_id: &str, thread_id: &str) -> Result<(), String> {
+    pub fn lock_thread(&mut self, board_id: &str, thread_id: &str) -> Result<(), String> {
         let path = self.check_thread_log_path(board_id, thread_id, true)?;
         let mut thread = OpenOptions::new().write(true).open(path)
           .expect("thread open error");
@@ -287,7 +285,7 @@ mod tests {
 
     #[test]
     fn test_create_board() {
-        let adapter = &TestAdapter::new("test_create_board", true);
+        let mut adapter = TestAdapter::new("test_create_board", true);
         let board_id = &adapter.create_board(BoardCreationParams { title: "test_create_board" }).unwrap();
         let raw_board = adapter.show_board(board_id).unwrap();
 
@@ -296,7 +294,7 @@ mod tests {
 
     #[test]
     fn test_create_thread() {
-        let adapter = &TestAdapter::new("test_create_thread", true);
+        let mut adapter = TestAdapter::new("test_create_thread", true);
         let board_id = &adapter.create_board(BoardCreationParams { title: "test_create_thread" }).unwrap();
         let board_thread_id_1 = adapter.create_thread(
             ThreadCreationParams {
@@ -351,7 +349,7 @@ mod tests {
 
     #[test]
     fn test_create_messages() {
-        let adapter = &TestAdapter::new("test_create_messages", true);
+        let mut adapter = TestAdapter::new("test_create_messages", true);
         let board_id = &adapter.create_board(BoardCreationParams { title: "test_create_messages" }).unwrap();
         let board_thread_id = adapter.create_thread(
             ThreadCreationParams {

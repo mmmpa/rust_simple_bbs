@@ -9,25 +9,18 @@ use std::collections::HashMap;
 use hyper::StatusCode;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
+use std::sync::mpsc::channel;
 
 pub struct SimpleBoardApi {
     gateway: DataGateway,
 }
 
 impl SimpleBoardApi {
-    pub fn start(gateway: Arc<RwLock<DataGateway>>) {
+    pub fn start(gateway: DataGateway) {
         let mut router = Router::new(gateway);
 
-        router.add_route("hello".to_string(), |_: &mut Request| {
+        router.add_route("hello".to_string(), |c: &Context, _: &mut Request| {
             Ok(Response::with((status::Ok, "Hello world !")))
-        });
-
-        router.add_route("hello/again".to_string(), |_: &mut Request| {
-            Ok(Response::with((status::Ok, "Hello again !")))
-        });
-
-        router.add_route("error".to_string(), |_: &mut Request| {
-            Ok(Response::with(status::BadRequest))
         });
 
         Iron::new(router).http("localhost:3000");
@@ -39,24 +32,36 @@ fn get_form(_request: &mut Request) -> IronResult<Response> {
     Ok(Response::with((ContentType::json().0, status::Ok, content)))
 }
 
-struct Router {
-    gateway: Arc<RwLock<DataGateway>>,
-    routes: HashMap<String, Box<Handler>>,
+trait CustomHandler: Send + Sync + 'static {
+    fn handle(&self, c: &Context, req: &mut Request) -> IronResult<Response>;
 }
 
-struct Context {
-    gateway: Arc<RwLock<DataGateway>>,
+impl<F> CustomHandler for F
+    where F: Send + Sync + 'static + Fn(&Context, &mut Request) -> IronResult<Response>
+{
+    fn handle(&self, c: &Context, req: &mut Request) -> IronResult<Response> {
+        (*self)(c, req)
+    }
 }
+
+struct Router {
+    gateway: DataGateway,
+    routes: HashMap<String, Box<CustomHandler>>,
+}
+
+struct Context {}
 
 impl Router {
-    fn new(gateway: Arc<RwLock<DataGateway>>) -> Self {
+    fn new(gateway: DataGateway) -> Self {
         Router {
-            gateway: gateway.clone(),
+            gateway: gateway,
             routes: HashMap::new(),
         }
     }
 
-    fn add_route<H>(&mut self, path: String, handler: fn(Context) -> H) where H: Handler {
+    fn add_route<H>(&mut self, path: String, handler: H)
+        where H: CustomHandler
+    {
         self.routes.insert(path, Box::new(handler));
     }
 }
@@ -64,8 +69,8 @@ impl Router {
 impl Handler for Router {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
         match self.routes.get(&req.url.path().join("/")) {
-            Some(handler) => handler(Context { gateway: self.gateway.clone() }).handle(req),
-            None => Ok(Response::with((status::NotFound, "not found"))),
+            Some(handler) => handler.handle(&Context {}, req),
+            None => Ok(Response::with(status::NotFound)),
         }
     }
 }
