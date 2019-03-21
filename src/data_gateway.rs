@@ -27,7 +27,7 @@ impl<'a> DataGateway<'a> {
     }
 
     pub fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<BoardThread, String> {
-        let RawThread { title, mut messages } = self.adapter.show_thread(board_id, thread_id, range)?;
+        let RawThread { locked, title, mut messages } = self.adapter.show_thread(board_id, thread_id, range)?;
 
         let messages = messages.iter_mut().map(|RawMessage { index, raw, html, single_anchors, range_anchors }| {
             ThreadMessage::retrieve(
@@ -38,7 +38,7 @@ impl<'a> DataGateway<'a> {
                 swap_vec(range_anchors),
             )
         }).collect();
-        Ok(BoardThread::retrieve(title, messages))
+        Ok(BoardThread::retrieve(locked, title, messages))
     }
 
     pub fn create_board(&self, title: &str) -> Result<String, String> {
@@ -129,11 +129,13 @@ mod tests {
         assert_eq!(board_thread_id, board_thread_id_2);
         assert_eq!(title, "test_create_thread_2");
 
-        let BoardThread { title, messages } = &gate.show_thread(&board_id, &board_thread_id_1, 0..100).unwrap();
+        let BoardThread { locked, title, messages } = &gate.show_thread(&board_id, &board_thread_id_1, 0..100).unwrap();
+        assert!(!locked);
         assert_eq!(title, "test_create_thread_1");
         assert_eq!(messages[0].raw, "raw1");
 
-        let BoardThread { title, messages } = &gate.show_thread(&board_id, &board_thread_id_2, 0..100).unwrap();
+        let BoardThread { locked, title, messages } = &gate.show_thread(&board_id, &board_thread_id_2, 0..100).unwrap();
+        assert!(!locked);
         assert_eq!(title, "test_create_thread_2");
         assert_eq!(messages[0].raw, "raw2");
     }

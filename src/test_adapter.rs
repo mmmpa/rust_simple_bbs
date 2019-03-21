@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::data_gateway_adapter::{RawThread, DataGatewayAdapter, RawMessage, MessageCreationParams, ThreadCreationParams, RawBoard, BoardCreationParams, RawThreadInformation};
 use std::fs::File;
-use std::io::{BufReader, BufRead};
+use std::io::{BufReader, BufRead, Seek};
 use std::path::Path;
 use std::io::Write;
 use std::ops::Range;
@@ -16,6 +16,27 @@ use std::mem::{replace};
 pub struct TestAdapter {
     logs_root_path: String,
     auto_sweeping: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct MessageRow {
+    pub raw: String,
+    pub html: String,
+    pub single_anchors: String,
+    pub range_anchors: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ThreadSchema {
+    title: String,
+    board_thread_id: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct BoardSchema {
+    board_id: String,
+    title: String,
+    threads: Vec<ThreadSchema>,
 }
 
 impl TestAdapter {
@@ -125,8 +146,7 @@ impl TestAdapter {
     fn san(string: &str) -> String {
         let mut result = String::with_capacity(string.len());
         string.chars().for_each(|c| match c {
-            '<' | '>' => (),
-            '\n' => result.push_str("\\n"),
+            '\n' => (),
             _ => result.push(c),
         });
         result
@@ -144,27 +164,6 @@ impl Drop for TestAdapter {
             fs::remove_dir_all(&self.logs_root_path).unwrap();
         }
     }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct MessageRow {
-    pub raw: String,
-    pub html: String,
-    pub single_anchors: String,
-    pub range_anchors: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct ThreadSchema {
-    title: String,
-    board_thread_id: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct BoardSchema {
-    board_id: String,
-    title: String,
-    threads: Vec<ThreadSchema>,
 }
 
 fn swap_string(a: &mut String) -> String {
@@ -191,6 +190,10 @@ impl DataGatewayAdapter for TestAdapter {
           .expect("unknown error");
         let mut lines = BufReader::new(thread).lines();
 
+        let locked = lines.next()
+          .expect("log format error (no lines)")
+          .expect("log format error (no locked)") != "";
+
         let title = lines.next()
           .expect("log format error (no lines)")
           .expect("log format error (no title)");
@@ -205,7 +208,7 @@ impl DataGatewayAdapter for TestAdapter {
           .map(|row| row.unwrap())
           .collect();
 
-        Ok(RawThread { title, messages })
+        Ok(RawThread { locked, title, messages })
     }
 
     fn create_board(&self, params: BoardCreationParams) -> Result<String, String> {
@@ -235,7 +238,7 @@ impl DataGatewayAdapter for TestAdapter {
         let title = Self::san(params.title);
         let first_row = Self::params_to_row(&params.first_message)?;
 
-        write!(thread, "{}", format!("{}\n{}", title, first_row)).unwrap();
+        write!(thread, "{}", format!("\n{}\n{}", title, first_row)).unwrap();
         self.register_thread(params.board_id, &new_thread_id, params.title).expect("registration error");
 
         Ok(new_thread_id)
@@ -243,8 +246,18 @@ impl DataGatewayAdapter for TestAdapter {
 
     fn create_message(&self, params: MessageCreationParams) -> Result<String, String> {
         let path = self.check_thread_log_path(params.board_id, params.board_thread_id, true)?;
-        let mut thread = OpenOptions::new().append(true).open(path)
+        let mut thread = OpenOptions::new().read(true).append(true).open(path)
           .expect("thread open error");
+
+        let mut lines = BufReader::new(&thread).lines();
+
+        let locked = lines.next()
+          .expect("log format error (no lines)")
+          .expect("log format error (no locked)") != "";
+
+        if locked {
+            return Err("locked".to_string());
+        }
 
         let row = Self::params_to_row(&params)?;
 
@@ -252,6 +265,18 @@ impl DataGatewayAdapter for TestAdapter {
           .expect("message write error");
 
         Ok(params.board_thread_id.to_string())
+    }
+
+    fn lock_thread(&self, board_id: &str, thread_id: &str) -> Result<(), String> {
+        let path = self.check_thread_log_path(board_id, thread_id, true)?;
+        let mut thread = OpenOptions::new().write(true).open(path)
+          .expect("thread open error");
+
+        thread.seek(std::io::SeekFrom::Start(0));
+        write!(thread, "{}", "locked\n")
+          .expect("message write error");
+
+        Ok(())
     }
 }
 
@@ -313,18 +338,20 @@ mod tests {
         assert_eq!(*board_thread_id, board_thread_id_2);
         assert_eq!(title, "test_create_thread_2");
 
-        let RawThread { title, messages } = adapter.show_thread(&board_id, &board_thread_id_1, 0..100).unwrap();
+        let RawThread { locked, title, messages } = adapter.show_thread(&board_id, &board_thread_id_1, 0..100).unwrap();
+        assert!(!locked);
         assert_eq!(title, "test_create_thread_1");
         assert_eq!(messages[0].raw, "raw1");
 
-        let RawThread { title, messages } = adapter.show_thread(&board_id, &board_thread_id_2, 0..100).unwrap();
+        let RawThread { locked, title, messages } = adapter.show_thread(&board_id, &board_thread_id_2, 0..100).unwrap();
+        assert!(!locked);
         assert_eq!(title, "test_create_thread_2");
         assert_eq!(messages[0].raw, "raw2");
     }
 
     #[test]
     fn test_create_messages() {
-        let adapter = &TestAdapter::new("test_create_messages", false);
+        let adapter = &TestAdapter::new("test_create_messages", true);
         let board_id = &adapter.create_board(BoardCreationParams { title: "test_create_messages" }).unwrap();
         let board_thread_id = adapter.create_thread(
             ThreadCreationParams {
@@ -355,8 +382,8 @@ mod tests {
             MessageCreationParams {
                 board_id,
                 board_thread_id: &board_thread_id,
-                raw: "message_2",
-                html: "message_2",
+                raw: "message\n_2",
+                html: "message\n_2",
                 single_anchors: &vec![1, 2, 3],
                 range_anchors: &vec![(2, 3), (3, 4)],
             }
@@ -373,5 +400,18 @@ mod tests {
 
         let RawThread { messages, .. } = adapter.show_thread(&board_id, &board_thread_id, 2..100).unwrap();
         assert_eq!(messages[0].raw, "message_2");
+
+        adapter.lock_thread(board_id, &board_thread_id).unwrap();
+
+        assert!(adapter.create_message(
+            MessageCreationParams {
+                board_id,
+                board_thread_id: &board_thread_id,
+                raw: "message_3",
+                html: "message_3",
+                single_anchors: &vec![1, 2, 3],
+                range_anchors: &vec![(2, 3), (3, 4)],
+            }
+        ).is_err());
     }
 }

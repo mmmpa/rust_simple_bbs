@@ -7,6 +7,8 @@ pub trait DataGatewayAdapter {
     fn create_board(&self, params: BoardCreationParams) -> Result<String, String>;
     fn create_thread(&self, params: ThreadCreationParams) -> Result<String, String>;
     fn create_message(&self, params: MessageCreationParams) -> Result<String, String>;
+
+    fn lock_thread(&self, board_id: &str, thread_id: &str) -> Result<(), String>;
 }
 
 #[derive(Debug)]
@@ -20,6 +22,7 @@ pub struct RawMessage {
 
 #[derive(Debug)]
 pub struct RawThread {
+    pub locked: bool,
     pub title: String,
     pub messages: Vec<RawMessage>,
 }
