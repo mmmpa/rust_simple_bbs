@@ -5,12 +5,12 @@ use crate::data_gateway_adapter::{DataGatewayAdapter, RawThread, RawMessage, Thr
 use std::mem::{replace};
 use std::ops::Range;
 
-pub struct DataGateway<'a> {
-    pub adapter: &'a DataGatewayAdapter,
+pub struct DataGateway {
+    pub adapter: Box<DataGatewayAdapter>,
 }
 
-impl<'a> DataGateway<'a> {
-    pub fn new(adapter: &DataGatewayAdapter) -> DataGateway {
+impl DataGateway {
+    pub fn new(adapter: Box<DataGatewayAdapter>) -> DataGateway {
         DataGateway { adapter }
     }
 
@@ -93,8 +93,8 @@ mod tests {
 
     #[test]
     fn test_create_board() {
-        let adapter = &TestAdapter::new("test_create_board_gate", true);
-        let gate = DataGateway::new(adapter);
+        let adapter = TestAdapter::new("test_create_board_gate", true);
+        let gate = DataGateway::new(Box::new(adapter));
         let board_id = &gate.create_board("test_create_board_gate").unwrap();
         let board = &gate.show_board(board_id).unwrap();
 
@@ -103,8 +103,8 @@ mod tests {
 
     #[test]
     fn test_create_thread() {
-        let adapter = &TestAdapter::new("test_create_thread_gate", true);
-        let gate = DataGateway::new(adapter);
+        let adapter = TestAdapter::new("test_create_thread_gate", true);
+        let gate = DataGateway::new(Box::new(adapter));
         let board_id = &gate.create_board("test_create_thread_gate").unwrap();
 
         let board_thread_id_1 = &gate.create_thread(
@@ -142,8 +142,8 @@ mod tests {
 
     #[test]
     fn test_create_messages() {
-        let adapter = &TestAdapter::new("test_create_messages_gate", true);
-        let gate = DataGateway::new(adapter);
+        let adapter = TestAdapter::new("test_create_messages_gate", true);
+        let gate = DataGateway::new(Box::new(adapter));
         let board_id = &gate.create_board("test_create_messages_gate").unwrap();
         let board_thread_id = &gate.create_thread(
             board_id,
