@@ -39,16 +39,19 @@ pub struct RawBoard {
     pub threads: Vec<RawThreadInformation>,
 }
 
+#[derive(Debug)]
 pub struct BoardCreationParams<'a> {
     pub title: &'a str,
 }
 
+#[derive(Debug)]
 pub struct ThreadCreationParams<'a> {
     pub board_id: &'a str,
     pub title: &'a str,
     pub first_message: MessageCreationParams<'a>
 }
 
+#[derive(Debug)]
 pub struct MessageCreationParams<'a> {
     pub board_id: &'a str,
     pub board_thread_id: &'a str,

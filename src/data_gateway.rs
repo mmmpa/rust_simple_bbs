@@ -42,6 +42,9 @@ impl DataGateway {
     }
 
     pub fn create_board(&mut self, title: &str) -> Result<String, String> {
+        if title.len() == 0 {
+            return Err("title required".to_string());
+        }
         self.adapter.create_board(BoardCreationParams { title })
     }
 

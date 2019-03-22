@@ -15,6 +15,7 @@ use std::mem::{replace};
 use crate::test_adapter::TestAdapter;
 use std::sync::{Arc, RwLock};
 
+#[derive(Debug)]
 pub struct JsonAdapter {
     auto_sweeping: bool,
     adapter: Arc<RwLock<TestAdapter>>,

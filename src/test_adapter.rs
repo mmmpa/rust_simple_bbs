@@ -13,6 +13,7 @@ use std::time::SystemTime;
 use std::fs;
 use std::mem::{replace};
 
+#[derive(Debug)]
 pub struct TestAdapter {
     logs_root_path: String,
     auto_sweeping: bool,

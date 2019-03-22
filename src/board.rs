@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Board {
     pub title: String,
     pub threads: Vec<ThreadInformation>,
