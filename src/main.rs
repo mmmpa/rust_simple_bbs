@@ -1,7 +1,5 @@
 use crate::server::Server;
 use crate::data_gateway::DataGateway;
-use crate::test_adapter::TestAdapter;
-use std::sync::{Arc, RwLock};
 use crate::json_adapter::JsonAdapter;
 
 mod thread_message;
@@ -25,3 +23,4 @@ fn main() {
 
     Server::start(gateway);
 }
+
