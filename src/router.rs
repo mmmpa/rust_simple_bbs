@@ -1,4 +1,4 @@
-extern crate iron;
+use iron;
 
 use iron::prelude::*;
 use iron::status;
@@ -21,7 +21,7 @@ type Routes<T> = HashMap<
     Method,
     HashMap<
         T,
-        Box<CustomHandler>
+        Box<dyn CustomHandler>
     >,
 >;
 
@@ -61,7 +61,7 @@ impl<T: 'static + Clone + Send + Sync + Hash + Eq> Router<T> {
 }
 
 impl<T: 'static + Clone + Send + Sync + Hash + Eq> Handler for Router<T> {
-    fn handle(&self, req: &mut Request) -> IronResult<Response> {
+    fn handle(&self, req: &mut Request<'_, '_>) -> IronResult<Response> {
         match self.matcher.pick(&req.url.path()) {
             None => Ok(Response::with(status::NotFound)),
             Some((key, params)) => {
@@ -80,11 +80,11 @@ impl<T: 'static + Clone + Send + Sync + Hash + Eq> Handler for Router<T> {
 }
 
 trait CustomHandler: Send + Sync + 'static {
-    fn handle(&self, c: &mut RouteContext, req: &mut Request) -> IronResult<Response>;
+    fn handle(&self, c: &mut RouteContext, req: &mut Request<'_, '_>) -> IronResult<Response>;
 }
 
-impl<F> CustomHandler for F where F: Send + Sync + 'static + Fn(&mut RouteContext, &mut Request) -> IronResult<Response> {
-    fn handle(&self, c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
+impl<F> CustomHandler for F where F: Send + Sync + 'static + Fn(&mut RouteContext, &mut Request<'_, '_>) -> IronResult<Response> {
+    fn handle(&self, c: &mut RouteContext, req: &mut Request<'_, '_>) -> IronResult<Response> {
         (*self)(c, req)
     }
 }

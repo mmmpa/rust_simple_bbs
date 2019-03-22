@@ -4,9 +4,9 @@ pub trait DataGatewayAdapter: Send + Sync {
     fn show_board(&self, board_id: &str) -> Result<RawBoard, String>;
     fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, String>;
 
-    fn create_board(&mut self, params: BoardCreationParams) -> Result<String, String>;
-    fn create_thread(&mut self, params: ThreadCreationParams) -> Result<String, String>;
-    fn create_message(&mut self, params: MessageCreationParams) -> Result<String, String>;
+    fn create_board(&mut self, params: BoardCreationParams<'_>) -> Result<String, String>;
+    fn create_thread(&mut self, params: ThreadCreationParams<'_>) -> Result<String, String>;
+    fn create_message(&mut self, params: MessageCreationParams<'_>) -> Result<String, String>;
 
     fn lock_thread(&mut self, board_id: &str, thread_id: &str) -> Result<(), String>;
 }

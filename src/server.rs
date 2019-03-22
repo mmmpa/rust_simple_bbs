@@ -1,4 +1,4 @@
-extern crate iron;
+use iron;
 
 use crate::router::Router;
 use crate::data_gateway::DataGateway;

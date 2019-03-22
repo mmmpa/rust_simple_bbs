@@ -1,4 +1,4 @@
-extern crate uuid;
+use uuid;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -43,15 +43,15 @@ impl DataGatewayAdapter for JsonAdapter {
         Ok(self.adapter.read().unwrap().show_thread(board_id, thread_id, range)?)
     }
 
-    fn create_board(&mut self, params: BoardCreationParams) -> Result<String, String> {
+    fn create_board(&mut self, params: BoardCreationParams<'_>) -> Result<String, String> {
         Ok(self.adapter.write().unwrap().create_board(params)?)
     }
 
-    fn create_thread(&mut self, params: ThreadCreationParams) -> Result<String, String> {
+    fn create_thread(&mut self, params: ThreadCreationParams<'_>) -> Result<String, String> {
         Ok(self.adapter.write().unwrap().create_thread(params)?)
     }
 
-    fn create_message(&mut self, params: MessageCreationParams) -> Result<String, String> {
+    fn create_message(&mut self, params: MessageCreationParams<'_>) -> Result<String, String> {
         Ok(self.adapter.write().unwrap().create_message(params)?)
     }
 

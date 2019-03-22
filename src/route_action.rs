@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-extern crate bodyparser;
+use bodyparser;
 
 use iron::prelude::*;
 use iron::status;
@@ -26,7 +26,7 @@ struct MessageCreationParams {
 }
 
 impl RouteAction {
-    pub fn show_board(c: &mut RouteContext, _req: &mut Request) -> IronResult<Response> {
+    pub fn show_board(c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
 
         match c.api.read().unwrap().show_board(board_id) {
@@ -35,7 +35,7 @@ impl RouteAction {
         }
     }
 
-    pub fn show_thread(c: &mut RouteContext, _req: &mut Request) -> IronResult<Response> {
+    pub fn show_thread(c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
         let thread_id = c.params.get("thread_id").unwrap();
 
@@ -45,7 +45,7 @@ impl RouteAction {
         }
     }
 
-    pub fn create_board(c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
+    pub fn create_board(c: &mut RouteContext, req: &mut Request<'_, '_>) -> IronResult<Response> {
         let body = match req.get::<
             bodyparser::Struct<BoardCreationParams>
         >() {
@@ -59,7 +59,7 @@ impl RouteAction {
         }
     }
 
-    pub fn create_thread(c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
+    pub fn create_thread(c: &mut RouteContext, req: &mut Request<'_, '_>) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
 
         let ThreadCreationParams {
@@ -78,7 +78,7 @@ impl RouteAction {
         }
     }
 
-    pub fn create_message(c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
+    pub fn create_message(c: &mut RouteContext, req: &mut Request<'_, '_>) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
         let thread_id = c.params.get("thread_id").unwrap();
 

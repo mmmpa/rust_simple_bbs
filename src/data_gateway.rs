@@ -6,11 +6,11 @@ use std::mem::{replace};
 use std::ops::Range;
 
 pub struct DataGateway {
-    pub adapter: Box<DataGatewayAdapter>,
+    pub adapter: Box<dyn DataGatewayAdapter>,
 }
 
 impl DataGateway {
-    pub fn new(adapter: Box<DataGatewayAdapter>) -> DataGateway {
+    pub fn new(adapter: Box<dyn DataGatewayAdapter>) -> DataGateway {
         DataGateway { adapter }
     }
 

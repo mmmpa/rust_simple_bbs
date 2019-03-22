@@ -1,4 +1,4 @@
-extern crate uuid;
+use uuid;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -132,7 +132,7 @@ impl TestAdapter {
         Ok(())
     }
 
-    fn params_to_row(message: &MessageCreationParams) -> Result<String, String> {
+    fn params_to_row(message: &MessageCreationParams<'_>) -> Result<String, String> {
         let message = MessageRow {
             raw: Self::san(message.raw),
             html: Self::san(message.html),
@@ -211,7 +211,7 @@ impl TestAdapter {
         Ok(RawThread { locked, title, messages })
     }
 
-    pub fn create_board(&mut self, params: BoardCreationParams) -> Result<String, String> {
+    pub fn create_board(&mut self, params: BoardCreationParams<'_>) -> Result<String, String> {
         let board_id = Self::generate_id();
         let schema = BoardSchema {
             board_id: board_id.clone(),
@@ -228,7 +228,7 @@ impl TestAdapter {
         Ok(board_id)
     }
 
-    pub fn create_thread(&mut self, params: ThreadCreationParams) -> Result<String, String> {
+    pub fn create_thread(&mut self, params: ThreadCreationParams<'_>) -> Result<String, String> {
         let new_thread_id = Self::generate_id();
 
         let path = self.check_thread_log_path(params.board_id, &new_thread_id, false)?;
@@ -244,7 +244,7 @@ impl TestAdapter {
         Ok(new_thread_id)
     }
 
-    pub fn create_message(&mut self, params: MessageCreationParams) -> Result<String, String> {
+    pub fn create_message(&mut self, params: MessageCreationParams<'_>) -> Result<String, String> {
         let path = self.check_thread_log_path(params.board_id, params.board_thread_id, true)?;
         let mut thread = OpenOptions::new().read(true).append(true).open(path)
           .or_err("thread open error")?;

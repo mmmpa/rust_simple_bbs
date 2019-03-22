@@ -24,7 +24,7 @@ enum EscapeState {
 }
 
 impl<'a> MessageArrangement<'a> {
-    fn new(raw_body: &str) -> MessageArrangement {
+    fn new(raw_body: &str) -> MessageArrangement<'_> {
         MessageArrangement {
             raw_body,
             state: EscapeState::Picking,
@@ -44,12 +44,12 @@ impl<'a> MessageArrangement<'a> {
 
         for (i, c) in raw_body.bytes().enumerate() {
             match c as char {
-                '>' | '-' | '0'...'9' => {
+                '>' | '-' | '0'..='9' => {
                     let c = c as char;
                     match c {
                         '>' => anchor.start_picking(i)?,
                         '-' => anchor.start_range(i)?,
-                        '0'...'9' => anchor.accumulate(i, c)?,
+                        '0'..='9' => anchor.accumulate(i, c)?,
                         _ => ()
                     };
                 },
