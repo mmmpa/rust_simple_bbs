@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
-use crate::simple_board_api::Context;
 
 extern crate bodyparser;
 
 use iron::prelude::*;
 use iron::status;
+use crate::router::RouteContext;
 
 pub struct RouteAction;
 
@@ -14,29 +14,26 @@ struct BoardCreationParams {
 }
 
 impl RouteAction {
-    pub fn create_board(c: &mut Context, req: &mut Request) -> IronResult<Response> {
+    pub fn create_board(c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
         let body = match req.get::<bodyparser::Struct<BoardCreationParams>>() {
             Ok(body) => body.unwrap(),
             Err(m) => return invalid_params()
         };
 
-        match c.gateway.write().unwrap().create_board(&body.title) {
+        match c.api.write().unwrap().create_board(&body.title) {
             Ok(id) => Ok(Response::with((status::Ok, id))),
             Err(m) => bad_params(m)
         }
     }
 
-    pub fn show_board(c: &mut Context, req: &mut Request) -> IronResult<Response> {
-        let body = match req.get::<bodyparser::Struct<BoardCreationParams>>() {
-            Ok(body) => body.unwrap(),
-            Err(m) => return invalid_params()
-        };
+    pub fn show_board(c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
+        let board_id = c.params.get("board_id").unwrap();
 
-        println!("{:?}", body);
-
-        match c.gateway.write().unwrap().create_board(&body.title) {
-            Ok(id) => Ok(Response::with((status::Ok, id))),
-            Err(m) => bad_params(m)
+        match c.api.read().unwrap().show_board(board_id) {
+            Err(m) => bad_params(m),
+            Ok(board) => {
+                Ok(Response::with((status::Ok, format!("{:?}", board))))
+            },
         }
     }
 }

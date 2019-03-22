@@ -14,6 +14,7 @@ mod test_adapter;
 mod json_adapter;
 mod simple_board_api;
 mod route_action;
+mod router;
 mod url_separation;
 
 fn main() {
