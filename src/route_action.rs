@@ -26,6 +26,9 @@ struct MessageCreationParams {
 }
 
 impl RouteAction {
+    pub fn show_root(c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
+        Ok(Response::with((status::Ok, "root")))
+    }
     pub fn show_board(c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
 

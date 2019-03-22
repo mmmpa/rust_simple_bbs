@@ -12,6 +12,7 @@ impl Server {
     pub fn start(gateway: DataGateway) {
         let mut router: Router<&str> = Router::new(gateway);
 
+        router.add_route(Method::Get, "show root", "/", RouteAction::show_root);
         router.add_route(Method::Get, "show board", "b/:board_id", RouteAction::show_board);
         router.add_route(Method::Get, "show thread", "b/:board_id/t/:thread_id", RouteAction::show_thread);
         router.add_route(Method::Get, "show thread with range", "b/:board_id/t/:thread_id/:range", RouteAction::show_thread);
@@ -23,4 +24,3 @@ impl Server {
         Iron::new(router).http("localhost:3000").unwrap();
     }
 }
-
