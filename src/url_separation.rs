@@ -41,7 +41,7 @@ impl<T: Clone + Send + Sync> Matcher<T> {
 
         let next = &levels[0];
 
-        let mut child = match children.get_mut(next) {
+        let child = match children.get_mut(next) {
             Some(child) => child,
             None => {
                 children.insert(next.to_string(), Matcher::new(None));

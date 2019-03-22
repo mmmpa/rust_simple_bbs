@@ -26,7 +26,7 @@ struct MessageCreationParams {
 }
 
 impl RouteAction {
-    pub fn show_board(c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
+    pub fn show_board(c: &mut RouteContext, _req: &mut Request) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
 
         match c.api.read().unwrap().show_board(board_id) {
@@ -35,7 +35,7 @@ impl RouteAction {
         }
     }
 
-    pub fn show_thread(c: &mut RouteContext, req: &mut Request) -> IronResult<Response> {
+    pub fn show_thread(c: &mut RouteContext, _req: &mut Request) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
         let thread_id = c.params.get("thread_id").unwrap();
 
@@ -50,7 +50,7 @@ impl RouteAction {
             bodyparser::Struct<BoardCreationParams>
         >() {
             Ok(body) => body.unwrap(),
-            Err(m) => return invalid_params()
+            Err(_m) => return invalid_params()
         };
 
         match c.api.write().unwrap().create_board(&body.title) {
@@ -69,7 +69,7 @@ impl RouteAction {
             bodyparser::Struct<ThreadCreationParams>
         >() {
             Ok(body) => body.unwrap(),
-            Err(m) => return invalid_params()
+            Err(_m) => return invalid_params()
         };
 
         match c.api.write().unwrap().create_thread(&board_id, &title, &message) {
@@ -88,11 +88,11 @@ impl RouteAction {
             bodyparser::Struct<MessageCreationParams>
         >() {
             Ok(body) => body.unwrap(),
-            Err(m) => return invalid_params()
+            Err(_m) => return invalid_params()
         };
 
         match c.api.write().unwrap().create_message(&board_id, &thread_id, &message) {
-            Ok(_) => Ok(Response::with((status::Ok))),
+            Ok(_) => Ok(Response::with(status::Ok)),
             Err(m) => bad_params(m)
         }
     }
