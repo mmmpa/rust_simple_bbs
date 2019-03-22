@@ -20,7 +20,8 @@ pub struct SimpleBoardApi {
 
 impl SimpleBoardApi {
     pub fn start(gateway: DataGateway) {
-        let mut router: Router<Arc<RwLock<CustomHandler>>> = Router::new(gateway);
+        let matcher = Matcher::new(None);
+        let mut router: Router<Arc<RwLock<CustomHandler>>> = Router::new(gateway, matcher);
 
         router.add_route(
             Method::Get,
@@ -69,7 +70,7 @@ pub struct Context {
 }
 
 impl<T: 'static + Clone + Send + Sync> Router<T> {
-    fn new(gateway: DataGateway) -> Self {
+    fn new(gateway: DataGateway, matcher: Matcher<T>) -> Self {
         let mut routes = HashMap::new();
         routes.insert(Method::Get, HashMap::new());
         routes.insert(Method::Post, HashMap::new());
@@ -79,7 +80,7 @@ impl<T: 'static + Clone + Send + Sync> Router<T> {
         Router {
             gateway: Arc::new(RwLock::new(gateway)),
             routes,
-            matcher: Matcher::new(Some(Arc::new(RwLock::new("".to_string())))),
+            matcher,
         }
     }
 
