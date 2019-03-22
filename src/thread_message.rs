@@ -1,6 +1,7 @@
 use crate::message_arrangement::MessageArrangement;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ThreadMessage {
     pub index: usize,
     pub raw: String,

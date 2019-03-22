@@ -1,4 +1,4 @@
-use crate::simple_board_api::SimpleBoardApi;
+use crate::server::Server;
 use crate::data_gateway::DataGateway;
 use crate::test_adapter::TestAdapter;
 use std::sync::{Arc, RwLock};
@@ -12,15 +12,16 @@ mod data_gateway;
 mod data_gateway_adapter;
 mod test_adapter;
 mod json_adapter;
-mod simple_board_api;
+mod server;
 mod route_action;
 mod router;
 mod url_separation;
+mod common_error;
+mod to_json;
 
 fn main() {
-    let g = DataGateway::new(
-        Box::new(JsonAdapter::new("real_run", false))
-    );
+    let adapter = JsonAdapter::new("real_run", false);
+    let gateway = DataGateway::new(Box::new(adapter));
 
-    SimpleBoardApi::start(g);
+    Server::start(gateway);
 }

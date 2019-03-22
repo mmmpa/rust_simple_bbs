@@ -48,19 +48,19 @@ impl DataGateway {
         self.adapter.create_board(BoardCreationParams { title })
     }
 
-    pub fn create_thread(&mut self, board_id: &str, title: &str, message: &ThreadMessage) -> Result<String, String> {
+    pub fn create_thread(&mut self, board_id: &str, title: &str, message: &str) -> Result<String, String> {
         self.adapter.create_thread(
             ThreadCreationParams {
                 board_id,
                 title,
-                first_message: message_to_params("", "", message)
+                first_message: message_to_params("", "", &ThreadMessage::new(message))
             }
         )
     }
 
-    pub fn create_message(&mut self, board_id: &str, board_thread_id: &str, message: &ThreadMessage) -> Result<(), String> {
+    pub fn create_message(&mut self, board_id: &str, board_thread_id: &str, message: &str) -> Result<(), String> {
         self.adapter.create_message(
-            message_to_params(board_id, board_thread_id, message)
+            message_to_params(board_id, board_thread_id, &ThreadMessage::new(message))
         )?;
         Ok(())
     }
@@ -114,12 +114,12 @@ mod tests {
         let board_thread_id_1 = &gate.create_thread(
             board_id,
             "test_create_thread_1",
-            &ThreadMessage::new("raw1"),
+            "raw1",
         ).unwrap();
         let board_thread_id_2 = &gate.create_thread(
             board_id,
             "test_create_thread_2",
-            &ThreadMessage::new("raw2"),
+            "raw2",
         ).unwrap();
 
         let board = &gate.show_board(board_id).unwrap();
@@ -152,18 +152,18 @@ mod tests {
         let board_thread_id = &gate.create_thread(
             board_id,
             "test_create_messages_gate",
-            &ThreadMessage::new("message_1"),
+            "message_1",
         ).unwrap();
 
         &gate.create_message(
             board_id,
             board_thread_id,
-            &ThreadMessage::new("message_1"),
+            "message_1",
         ).unwrap();
         &gate.create_message(
             board_id,
             board_thread_id,
-            &ThreadMessage::new("message_2"),
+            "message_2",
         ).unwrap();
 
         let BoardThread { messages, .. } = &gate.show_thread(&board_id, &board_thread_id, 0..100).unwrap();

@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use crate::common_error::OrError;
 
 pub struct MessageArrangement<'a> {
     raw_body: &'a str,
@@ -99,7 +100,7 @@ impl<'a> MessageArrangement<'a> {
                 self.result.push_str("&gt;");
             },
             EscapeState::PickingStarterHavingNum => {
-                self.start = usize::from_str(&self.num_string).expect("invalid num");
+                self.start = usize::from_str(&self.num_string).or_err("invalid num")?;
                 self.result.push_str(
                     &format!(
                         r###"<a href="#{0:?}">&gt;{0:?}</a>"###,
@@ -120,7 +121,7 @@ impl<'a> MessageArrangement<'a> {
                 self.reset(now);
             },
             EscapeState::PickingFinisherHavingNum => {
-                self.end = usize::from_str(&self.num_string).expect("invalid num");
+                self.end = usize::from_str(&self.num_string).or_err("invalid num")?;
                 self.result.push_str(
                     &format!(
                         r###"<a href="#{0:?}-{1:?}">&gt;{0:?}-{1:?}</a>"###,
@@ -148,7 +149,7 @@ impl<'a> MessageArrangement<'a> {
     fn start_range(&mut self, now: usize) -> Result<(), String> {
         match self.state {
             EscapeState::PickingStarterHavingNum => {
-                self.start = usize::from_str(&self.num_string).expect("invalid num");
+                self.start = usize::from_str(&self.num_string).or_err("invalid num")?;
                 self.num_string.clear();
                 self.state = EscapeState::PickingFinisher;
             },

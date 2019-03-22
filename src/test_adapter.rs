@@ -12,6 +12,7 @@ use std::fs::OpenOptions;
 use std::time::SystemTime;
 use std::fs;
 use std::mem::{replace};
+use crate::common_error::OrError;
 
 #[derive(Debug)]
 pub struct TestAdapter {
@@ -58,7 +59,7 @@ impl TestAdapter {
         if Path::new(&logs_root_path).exists() {
             //
         } else {
-            fs::create_dir(&logs_root_path).expect("test adapter initialize error");
+            fs::create_dir(&logs_root_path).or_err("test adapter initialize error");
         }
 
         TestAdapter {
@@ -117,7 +118,7 @@ impl TestAdapter {
 
     fn read_board_schema(&self, board_id: &str) -> Result<BoardSchema, String> {
         let path = self.generate_board_info_path(board_id);
-        let json = fs::read_to_string(path).expect("broken info file");
+        let json = fs::read_to_string(path).or_err("broken info file")?;
         let schema: BoardSchema = serde_json::from_str(&json).unwrap();
 
         Ok(schema)
@@ -125,8 +126,8 @@ impl TestAdapter {
 
     fn write_board_schema(&self, schema: &BoardSchema) -> Result<(), String> {
         let path = self.generate_board_info_path(&schema.board_id);
-        let board_json = serde_json::to_string(&schema).expect("parse error");
-        fs::write(path, board_json).expect("board schema write error");
+        let board_json = serde_json::to_string(&schema).or_err("parse error")?;
+        fs::write(path, board_json).or_err("board schema write error")?;
 
         Ok(())
     }
@@ -138,13 +139,13 @@ impl TestAdapter {
             single_anchors: message.single_anchors.iter().map(|n| format!("{}", n)).collect::<Vec<String>>().join(","),
             range_anchors: message.range_anchors.iter().map(|(h, e)| format!("{}-{}", h, e)).collect::<Vec<String>>().join(","),
         };
-        let json = serde_json::to_string(&message).expect("parse error");
+        let json = serde_json::to_string(&message).or_err("parse error")?;
 
         Ok(format!("{}\n", json))
     }
 
     fn row_to_raw(index: usize, raw: &str) -> Result<RawMessage, String> {
-        let mut message: MessageRow = serde_json::from_str(raw).expect("parse error");
+        let mut message: MessageRow = serde_json::from_str(raw).or_err("parse error")?;
         let raw = RawMessage {
             index,
             raw: swap_string(&mut message.raw),
@@ -186,7 +187,7 @@ impl TestAdapter {
     pub fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, String> {
         let path = self.check_thread_log_path(board_id, thread_id, true)?;
         let thread = File::open(path)
-          .expect("unknown error");
+          .or_err("unknown error")?;
         let mut lines = BufReader::new(thread).lines();
 
         let locked = lines.next()
@@ -195,7 +196,7 @@ impl TestAdapter {
 
         let title = lines.next()
           .expect("log format error (no lines)")
-          .expect("log format error (no title)");
+          .or_err("log format error (no title)")?;
 
         let messages = lines
           .enumerate()
@@ -219,7 +220,7 @@ impl TestAdapter {
         };
 
         let path = self.check_board_path(&board_id, false)?;
-        fs::create_dir(&path).expect("board create error");
+        fs::create_dir(&path).or_err("board create error")?;
 
         self.check_board_info_path(&board_id, false)?;
         self.write_board_schema(&schema)?;
@@ -232,13 +233,13 @@ impl TestAdapter {
 
         let path = self.check_thread_log_path(params.board_id, &new_thread_id, false)?;
         let mut thread = OpenOptions::new().create(true).append(true).open(path)
-          .expect("thread open error");
+          .or_err("thread open error")?;
 
         let title = Self::san(params.title);
         let first_row = Self::params_to_row(&params.first_message)?;
 
         write!(thread, "{}", format!("\n{}\n{}", title, first_row)).unwrap();
-        self.register_thread(params.board_id, &new_thread_id, params.title).expect("registration error");
+        self.register_thread(params.board_id, &new_thread_id, params.title).or_err("registration error")?;
 
         Ok(new_thread_id)
     }
@@ -246,7 +247,7 @@ impl TestAdapter {
     pub fn create_message(&mut self, params: MessageCreationParams) -> Result<String, String> {
         let path = self.check_thread_log_path(params.board_id, params.board_thread_id, true)?;
         let mut thread = OpenOptions::new().read(true).append(true).open(path)
-          .expect("thread open error");
+          .or_err("thread open error")?;
 
         let mut lines = BufReader::new(&thread).lines();
 
@@ -261,7 +262,7 @@ impl TestAdapter {
         let row = Self::params_to_row(&params)?;
 
         write!(thread, "{}", row)
-          .expect("message write error");
+          .or_err("message write error")?;
 
         Ok(params.board_thread_id.to_string())
     }
@@ -269,11 +270,11 @@ impl TestAdapter {
     pub fn lock_thread(&mut self, board_id: &str, thread_id: &str) -> Result<(), String> {
         let path = self.check_thread_log_path(board_id, thread_id, true)?;
         let mut thread = OpenOptions::new().write(true).open(path)
-          .expect("thread open error");
+          .or_err("thread open error")?;
 
         thread.seek(std::io::SeekFrom::Start(0));
         write!(thread, "{}", "locked\n")
-          .expect("message write error");
+          .or_err("message write error")?;
 
         Ok(())
     }
