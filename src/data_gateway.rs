@@ -53,14 +53,14 @@ impl DataGateway {
             ThreadCreationParams {
                 board_id,
                 title,
-                first_message: message_to_params("", "", &ThreadMessage::new(message))
+                first_message: message_to_params("", "", &ThreadMessage::from_raw(message)?)
             }
         )
     }
 
     pub fn create_message(&mut self, board_id: &str, board_thread_id: &str, message: &str) -> Result<(), String> {
         self.adapter.create_message(
-            message_to_params(board_id, board_thread_id, &ThreadMessage::new(message))
+            message_to_params(board_id, board_thread_id, &ThreadMessage::from_raw(message)?)
         )?;
         Ok(())
     }

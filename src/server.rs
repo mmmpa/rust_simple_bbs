@@ -6,9 +6,7 @@ use self::iron::method::Method;
 use crate::route_action::RouteAction;
 use self::iron::prelude::Iron;
 
-pub struct Server {
-    gateway: DataGateway,
-}
+pub struct Server {}
 
 impl Server {
     pub fn start(gateway: DataGateway) {
@@ -22,7 +20,7 @@ impl Server {
         router.add_route(Method::Post, "create thread", "b/:board_id/t", RouteAction::create_thread);
         router.add_route(Method::Post, "create message", "b/:board_id/t/:thread_id/m", RouteAction::create_message);
 
-        Iron::new(router).http("localhost:3000");
+        Iron::new(router).http("localhost:3000").unwrap();
     }
 }
 

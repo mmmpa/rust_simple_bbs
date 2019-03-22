@@ -2,7 +2,7 @@ use uuid;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::data_gateway_adapter::{RawThread, DataGatewayAdapter, RawMessage, MessageCreationParams, ThreadCreationParams, RawBoard, BoardCreationParams, RawThreadInformation};
+use crate::data_gateway_adapter::{RawThread, RawMessage, MessageCreationParams, ThreadCreationParams, RawBoard, BoardCreationParams, RawThreadInformation};
 use std::fs::File;
 use std::io::{BufReader, BufRead, Seek};
 use std::path::Path;
@@ -59,7 +59,7 @@ impl TestAdapter {
         if Path::new(&logs_root_path).exists() {
             //
         } else {
-            fs::create_dir(&logs_root_path).or_err("test adapter initialize error");
+            fs::create_dir(&logs_root_path).expect("test adapter initialize error");
         }
 
         TestAdapter {
@@ -272,7 +272,7 @@ impl TestAdapter {
         let mut thread = OpenOptions::new().write(true).open(path)
           .or_err("thread open error")?;
 
-        thread.seek(std::io::SeekFrom::Start(0));
+        thread.seek(std::io::SeekFrom::Start(0)).or_err("lock file failure")?;
         write!(thread, "{}", "locked\n")
           .or_err("message write error")?;
 

@@ -3,15 +3,10 @@ use iron;
 use iron::prelude::*;
 use iron::status;
 use crate::data_gateway::DataGateway;
-use iron::headers::ContentType;
 use self::iron::Handler;
 use std::collections::HashMap;
-use hyper::StatusCode;
-use std::rc::Rc;
 use std::sync::{Arc, RwLock};
-use std::sync::mpsc::channel;
 use self::iron::method::Method;
-use crate::route_action::RouteAction;
 use crate::url_separation::Matcher;
 use std::hash::Hash;
 
@@ -79,7 +74,7 @@ impl<T: 'static + Clone + Send + Sync + Hash + Eq> Handler for Router<T> {
     }
 }
 
-trait CustomHandler: Send + Sync + 'static {
+pub trait CustomHandler: Send + Sync + 'static {
     fn handle(&self, c: &mut RouteContext, req: &mut Request<'_, '_>) -> IronResult<Response>;
 }
 

@@ -1,7 +1,5 @@
 use std::collections::HashMap;
-use std::fmt::Debug;
 
-#[derive(Debug)]
 pub struct Matcher<T: Clone + Send + Sync> {
     matching: Option<T>,
     matching_params: Option<Vec<String>>,

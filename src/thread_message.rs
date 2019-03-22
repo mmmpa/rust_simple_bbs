@@ -11,12 +11,6 @@ pub struct ThreadMessage {
 }
 
 impl ThreadMessage {
-    pub fn new(raw: &str) -> ThreadMessage {
-        ThreadMessage {
-            raw: raw.to_string(),
-            ..ThreadMessage::default()
-        }
-    }
     pub fn retrieve(index: usize, raw: String, html: String, single_anchors: Vec<usize>, range_anchors: Vec<(usize, usize)>) -> ThreadMessage {
         ThreadMessage { index, raw, html, single_anchors, range_anchors }
     }
@@ -31,23 +25,23 @@ impl ThreadMessage {
         }
     }
 
-    fn from_raw(raw: String) -> Result<ThreadMessage, String> {
-        let (html, single_anchors, range_anchors) = MessageArrangement::execute(&raw)?;
+    pub fn from_raw(raw: &str) -> Result<ThreadMessage, String> {
+        let (html, single_anchors, range_anchors) = MessageArrangement::execute(raw)?;
 
-        Ok(ThreadMessage { raw, html, single_anchors, range_anchors, ..ThreadMessage::default() })
+        Ok(ThreadMessage { raw: raw.to_string(), html, single_anchors, range_anchors, ..ThreadMessage::default() })
     }
 }
 
 #[test]
 fn test_render() {
-    let m = ThreadMessage::from_raw("".to_string()).unwrap();
+    let m = ThreadMessage::from_raw("").unwrap();
     assert_eq!(m.html, "");
 
     let m = ThreadMessage::from_raw(r###"
         >1
         >01
         >10
-    "###.to_string()).unwrap();
+    "###).unwrap();
     assert_eq!(m.html, r###"
         <a href="#1">&gt;1</a>
         <a href="#1">&gt;1</a>
