@@ -12,6 +12,7 @@ use std::sync::{Arc, RwLock};
 use std::sync::mpsc::channel;
 use self::iron::method::Method;
 use crate::route_action::RouteAction;
+use crate::url_separation::Matcher;
 
 pub struct SimpleBoardApi {
     gateway: DataGateway,
@@ -19,7 +20,7 @@ pub struct SimpleBoardApi {
 
 impl SimpleBoardApi {
     pub fn start(gateway: DataGateway) {
-        let mut router = Router::new(gateway);
+        let mut router: Router<Arc<RwLock<CustomHandler>>> = Router::new(gateway);
 
         router.add_route(
             Method::Get,
@@ -56,9 +57,10 @@ type RouteMap = HashMap<
 
 type PassedGateway = Arc<RwLock<DataGateway>>;
 
-struct Router {
+struct Router<T: 'static + Clone + Send + Sync> {
     gateway: PassedGateway,
     routes: RouteMap,
+    matcher: Matcher<T>,
 }
 
 pub struct Context {
@@ -66,7 +68,7 @@ pub struct Context {
     pub route_params: HashMap<String, String>,
 }
 
-impl Router {
+impl<T: 'static + Clone + Send + Sync> Router<T> {
     fn new(gateway: DataGateway) -> Self {
         let mut routes = HashMap::new();
         routes.insert(Method::Get, HashMap::new());
@@ -77,6 +79,7 @@ impl Router {
         Router {
             gateway: Arc::new(RwLock::new(gateway)),
             routes,
+            matcher: Matcher::new(Some(Arc::new(RwLock::new("".to_string())))),
         }
     }
 
@@ -86,7 +89,7 @@ impl Router {
     }
 }
 
-impl Handler for Router {
+impl<T: 'static + Clone + Send + Sync> Handler for Router<T> {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
         let route_params = HashMap::new();
 

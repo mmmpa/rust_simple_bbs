@@ -2,16 +2,16 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 #[derive(Debug)]
-struct Matcher<T: Clone + Debug> {
+pub struct Matcher<T: Clone + Send + Sync> {
     matching: Option<T>,
     matching_params: Option<Vec<String>>,
     children: Option<HashMap<String, Matcher<T>>>,
 }
 
-const SEPARATOR: &str = ":";
+const PLACEHOLDER: &str = ":";
 
-impl<T: Clone + Debug> Matcher<T> {
-    fn new(matching: Option<T>) -> Self {
+impl<T: Clone + Send + Sync> Matcher<T> {
+    pub fn new(matching: Option<T>) -> Self {
         Matcher {
             matching,
             matching_params: None,
@@ -19,37 +19,40 @@ impl<T: Clone + Debug> Matcher<T> {
         }
     }
 
-    fn add(&mut self, base: &str, matching: T) {
+    pub fn add(&mut self, base: &str, matching: T) {
         let (levels, keys) = separate(base);
         self.add_h(&levels[..], keys, matching);
     }
 
     fn add_h(&mut self, levels: &[String], keys: Vec<String>, matching: T) {
-        match &self.children {
-            Some(_) => (),
-            None => self.children = Some(HashMap::new())
-        };
-
         if levels.len() == 0 {
             self.matching = Some(matching);
             self.matching_params = Some(keys);
             return;
         }
 
-        let chldren = self.children.as_mut().unwrap();
+        let children = match &mut self.children {
+            Some(chldren) => chldren,
+            None => {
+                self.children = Some(HashMap::new());
+                self.children.as_mut().unwrap()
+            }
+        };
 
         let next = &levels[0];
-        match chldren.get_mut(next) {
-            Some(c) => c.add_h(&levels[1..], keys, matching),
+
+        let mut child = match children.get_mut(next) {
+            Some(child) => child,
             None => {
-                let mut newer = Matcher::new(None);
-                newer.add_h(&levels[1..], keys, matching);
-                chldren.insert(next.to_string(), newer);
+                children.insert(next.to_string(), Matcher::new(None));
+                children.get_mut(next).unwrap()
             }
-        }
+        };
+
+        child.add_h(&levels[1..], keys, matching);
     }
 
-    fn pick(&self, paths: &[&str]) -> Option<(T, HashMap<String, String>)> {
+    pub fn pick(&self, paths: &[&str]) -> Option<(T, HashMap<String, String>)> {
         self.pick_r(paths, &mut Vec::with_capacity(2))
     }
 
@@ -74,7 +77,7 @@ impl<T: Clone + Debug> Matcher<T> {
         let children = self.children.as_ref().unwrap().clone();
 
         let next = match children.get(paths[0]) {
-            None => match children.get(SEPARATOR) {
+            None => match children.get(PLACEHOLDER) {
                 None => return None,
                 Some(next) => {
                     values.push(paths[0].to_string());
@@ -106,22 +109,19 @@ fn separate(base: &str) -> (Vec<String>, Vec<String>) {
     for (i, c) in checker.chars().enumerate() {
         match c {
             ':' => {
-                if !in_key {
-                    in_key = true;
-                }
+                if !in_key { in_key = true }
+                head += 1;
             },
             '/' => {
+                let key_name = base[head..i].to_string();
+                head = i + 1;
                 if in_key {
-                    let key_name = base[head + 1..i].to_string();
-                    println!("{}", key_name);
                     keys.push(key_name);
-                    lebels.push(SEPARATOR.to_string());
+                    lebels.push(PLACEHOLDER.to_string());
                     in_key = false;
                 } else {
-                    let key_name = base[head..i].to_string();
                     lebels.push(key_name);
                 }
-                head = i + 1;
             }
             _ => ()
         }
@@ -136,21 +136,37 @@ fn build(keys: &[String], values: &[String]) -> HashMap<String, String> {
     value_map
 }
 
-#[test]
-fn test() {
-    let mut m = Matcher::new(Some("".to_string()));
-    m.add("aaa/:abc/ddd", "matching DDD".to_string());
-    m.add("aaa/bbb", "matching BBB".to_string());
+#[cfg(test)]
+mod tests {
+    use crate::url_separation::Matcher;
+    use std::collections::HashMap;
+    use std::sync::Arc;
 
-    let (matching, map) = m.pick(&vec!["aaa", "bbb"]).unwrap();
-    assert_eq!(matching, "matching BBB".to_string());
-    assert_eq!(map, HashMap::new());
+    #[test]
+    fn test_string() {
+        let mut m = Matcher::new(Some("".to_string()));
+        m.add("aaa/:abc/ddd", "matching DDD".to_string());
+        m.add("aaa/bbb", "matching BBB".to_string());
 
-    let (matching, map) = m.pick(&vec!["aaa", "DDD", "ddd"]).unwrap();
-    let mut expected = HashMap::new();
-    expected.insert("abc".to_string(), "DDD".to_string());
-    assert_eq!(matching, "matching DDD".to_string());
-    assert_eq!(map, expected);
+        let (matching, map) = m.pick(&vec!["aaa", "bbb"]).unwrap();
+        assert_eq!(matching, "matching BBB".to_string());
+        assert_eq!(map, HashMap::new());
 
-    assert!(m.pick(&vec!["b", "DDD", "ddd"]).is_none());
+        let (matching, map) = m.pick(&vec!["aaa", "DDD", "ddd"]).unwrap();
+        let mut expected = HashMap::new();
+        expected.insert("abc".to_string(), "DDD".to_string());
+        assert_eq!(matching, "matching DDD".to_string());
+        assert_eq!(map, expected);
+
+        assert!(m.pick(&vec!["b", "DDD", "ddd"]).is_none());
+    }
+
+    #[test]
+    fn test_callback() {
+        let mut m = Matcher::new(None);
+        m.add("aaa/bbb", Arc::new(|| "test".to_string()));
+
+        let (matching, _) = m.pick(&vec!["aaa", "bbb"]).unwrap();
+        assert_eq!(matching(), "test".to_string());
+    }
 }
