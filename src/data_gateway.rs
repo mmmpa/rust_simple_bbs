@@ -1,7 +1,7 @@
 use crate::board_thread::BoardThread;
 use crate::thread_message::ThreadMessage;
-use crate::board::{Board, ThreadInformation};
-use crate::data_gateway_adapter::{DataGatewayAdapter, RawThread, RawMessage, ThreadCreationParams, MessageCreationParams, BoardCreationParams, RawBoard, RawThreadInformation};
+use crate::board::{Board, ThreadSummary};
+use crate::data_gateway_adapter::{DataGatewayAdapter, RawThread, RawMessage, ThreadCreationParams, MessageCreationParams, BoardCreationParams, RawBoard, RawThreadSummary};
 use std::mem::{replace};
 use std::ops::Range;
 
@@ -15,9 +15,9 @@ impl DataGateway {
     }
 
     pub fn show_board(&self, board_id: &str) -> Result<Board, String> {
-        let RawBoard { mut title, mut threads } = self.adapter.show_board(board_id)?;
-        let threads = threads.iter_mut().map(|RawThreadInformation { title, board_thread_id }| {
-            ThreadInformation {
+        let RawBoard { mut title, mut summaries } = self.adapter.show_board(board_id)?;
+        let threads = summaries.iter_mut().map(|RawThreadSummary { title, board_thread_id }| {
+            ThreadSummary {
                 title: swap_string(title),
                 board_thread_id: swap_string(board_thread_id),
             }
@@ -89,7 +89,7 @@ fn swap_vec<T>(a: &mut Vec<T>) -> Vec<T> {
 #[cfg(test)]
 mod tests {
     use crate::data_gateway::DataGateway;
-    use crate::board::ThreadInformation;
+    use crate::board::ThreadSummary;
     use crate::board_thread::BoardThread;
     use crate::json_adapter::JsonAdapter;
 
@@ -121,13 +121,13 @@ mod tests {
         ).unwrap();
 
         let board = &gate.show_board(board_id).unwrap();
-        assert_eq!(board.threads.len(), 2);
+        assert_eq!(board.summaries.len(), 2);
 
-        let ThreadInformation { title, board_thread_id } = &board.threads[0];
+        let ThreadSummary { title, board_thread_id } = &board.summaries[0];
         assert_eq!(board_thread_id, board_thread_id_1);
         assert_eq!(title, "test_create_thread_1");
 
-        let ThreadInformation { title, board_thread_id } = &board.threads[1];
+        let ThreadSummary { title, board_thread_id } = &board.summaries[1];
         assert_eq!(board_thread_id, board_thread_id_2);
         assert_eq!(title, "test_create_thread_2");
 

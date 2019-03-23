@@ -66,7 +66,7 @@ export type ThreadItem = {
   index: number
   name: string
   email: string
-  comment: string
+  body: string
   mentioned: number[]
   mention: number[]
 }

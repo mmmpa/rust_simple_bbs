@@ -3,6 +3,7 @@ import { Route } from 'react-router-dom';
 import * as pathToRegexp from 'path-to-regexp';
 import LandingPage from './components/LandingPage';
 import ThreadBody from './components/ThreadBody';
+import ThreadCreation from './components/ThreadCreation';
 import ThreadIndex from './components/ThreadIndex';
 import { indexThread, showThread } from './store/actions';
 import { CustomRouteProps } from './types';
@@ -30,6 +31,12 @@ export default function createRoutes ({ store }): [CustomRouteProps[], Route[]] 
       path: '',
       component: LandingPage,
       exact: true,
+      prefetch: payload => store.dispatch(indexThread(payload)),
+    },
+    {
+      path: 'threads_new',
+      exact: true,
+      component: ThreadCreation,
       prefetch: payload => store.dispatch(indexThread(payload)),
     },
     {

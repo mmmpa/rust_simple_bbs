@@ -2,7 +2,7 @@ use uuid;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::data_gateway_adapter::{RawThread, RawMessage, MessageCreationParams, ThreadCreationParams, RawBoard, BoardCreationParams, RawThreadInformation};
+use crate::data_gateway_adapter::{RawThread, RawMessage, MessageCreationParams, ThreadCreationParams, RawBoard, BoardCreationParams, RawThreadSummary};
 use std::fs::File;
 use std::io::{BufReader, BufRead, Seek};
 use std::path::Path;
@@ -38,7 +38,7 @@ struct ThreadSchema {
 struct BoardSchema {
     board_id: String,
     title: String,
-    threads: Vec<ThreadSchema>,
+    summaries: Vec<ThreadSchema>,
 }
 
 impl Drop for TestAdapter {
@@ -106,7 +106,7 @@ impl TestAdapter {
 
     fn register_thread(&self, board_id: &str, board_thread_id: &str, title: &str) -> Result<(), String> {
         let mut board = self.read_board_schema(board_id)?;
-        board.threads.push(
+        board.summaries.push(
             ThreadSchema {
                 title: title.to_string(),
                 board_thread_id: board_thread_id.to_string(),
@@ -178,8 +178,8 @@ impl TestAdapter {
         Ok(
             RawBoard {
                 title: board.title,
-                threads: board.threads.iter_mut().map(|ThreadSchema { title, board_thread_id }|
-                  RawThreadInformation { title: swap_string(title), board_thread_id: swap_string(board_thread_id) }
+                summaries: board.summaries.iter_mut().map(|ThreadSchema { title, board_thread_id }|
+                  RawThreadSummary { title: swap_string(title), board_thread_id: swap_string(board_thread_id) }
                 ).collect()
             }
         )
@@ -217,7 +217,7 @@ impl TestAdapter {
         let schema = BoardSchema {
             board_id: board_id.clone(),
             title: params.title.to_string(),
-            threads: vec![],
+            summaries: vec![],
         };
 
         let path = self.check_board_path(&board_id, false)?;
@@ -284,7 +284,7 @@ impl TestAdapter {
 #[cfg(test)]
 mod tests {
     use crate::test_adapter::TestAdapter;
-    use crate::data_gateway_adapter::{MessageCreationParams, ThreadCreationParams, BoardCreationParams, RawThreadInformation, RawThread};
+    use crate::data_gateway_adapter::{MessageCreationParams, ThreadCreationParams, BoardCreationParams, RawThreadSummary, RawThread};
 
     #[test]
     fn test_create_board() {
@@ -329,13 +329,13 @@ mod tests {
         ).unwrap();
 
         let raw_board = adapter.show_board(board_id).unwrap();
-        assert_eq!(raw_board.threads.len(), 2);
+        assert_eq!(raw_board.summaries.len(), 2);
 
-        let RawThreadInformation { title, board_thread_id } = &raw_board.threads[0];
+        let RawThreadSummary { title, board_thread_id } = &raw_board.summaries[0];
         assert_eq!(*board_thread_id, board_thread_id_1);
         assert_eq!(title, "test_create_thread_1");
 
-        let RawThreadInformation { title, board_thread_id } = &raw_board.threads[1];
+        let RawThreadSummary { title, board_thread_id } = &raw_board.summaries[1];
         assert_eq!(*board_thread_id, board_thread_id_2);
         assert_eq!(title, "test_create_thread_2");
 

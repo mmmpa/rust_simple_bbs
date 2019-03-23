@@ -43,3 +43,4 @@ impl DataGatewayAdapter for JsonAdapter {
         Ok(self.adapter.write().unwrap().lock_thread(board_id, thread_id)?)
     }
 }
+

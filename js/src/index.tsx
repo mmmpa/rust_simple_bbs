@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import createApp from './createApp';
 import './index.styles.sass';
-import api from './clientSideApi';
+import createApi from './clientSideApi';
 import createRoutes from './createRoutes';
 import createHistory from './createHistory';
 import Registry from './Registry';
@@ -14,7 +14,7 @@ function start (window): void {
 
   Registry.routes = routes;
   Registry.store = store;
-  Registry.api = api;
+  Registry.api = createApi();
 
   const { pathname } = window.location;
   const history = createHistory({ window, routes, pathname });

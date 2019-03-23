@@ -72,7 +72,7 @@ mod tests {
         }
 
         let board: Board = get_board(port, &board_id);
-        assert_eq!(board.threads.len(), 1000);
+        assert_eq!(board.summaries.len(), 1000);
     }
 
     #[test]

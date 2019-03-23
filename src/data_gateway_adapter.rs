@@ -28,7 +28,7 @@ pub struct RawThread {
 }
 
 #[derive(Debug)]
-pub struct RawThreadInformation {
+pub struct RawThreadSummary {
     pub title: String,
     pub board_thread_id: String,
 }
@@ -36,7 +36,7 @@ pub struct RawThreadInformation {
 #[derive(Debug)]
 pub struct RawBoard {
     pub title: String,
-    pub threads: Vec<RawThreadInformation>,
+    pub summaries: Vec<RawThreadSummary>,
 }
 
 #[derive(Debug)]
