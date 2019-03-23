@@ -43,6 +43,7 @@ struct BoardSchema {
 
 impl Drop for TestAdapter {
     fn drop(&mut self) {
+        println!("drop");
         if self.auto_sweeping {
             fs::remove_dir_all(&self.logs_root_path).unwrap();
         }

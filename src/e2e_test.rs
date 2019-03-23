@@ -159,22 +159,22 @@ mod tests {
     }
 
     fn board_url(port: u16) -> String {
-        format!("{}/b", host_url(port))
+        format!("{}/api/b", host_url(port))
     }
 
     fn build_board_url(port: u16, board_id: &str) -> String {
-        format!("{}/b/{}", host_url(port), board_id)
+        format!("{}/api/b/{}", host_url(port), board_id)
     }
 
     fn build_board_thread_url(port: u16, board_id: &str) -> String {
-        format!("{}/b/{}/t", host_url(port), board_id)
+        format!("{}/api/b/{}/t", host_url(port), board_id)
     }
 
     fn build_thread_url(port: u16, board_id: &str, thread_id: &str) -> String {
-        format!("{}/b/{}/t/{}", host_url(port), board_id, thread_id)
+        format!("{}/api/b/{}/t/{}", host_url(port), board_id, thread_id)
     }
 
     fn build_thread_message_url(port: u16, board_id: &str, thread_id: &str) -> String {
-        format!("{}/b/{}/t/{}/m", host_url(port), board_id, thread_id)
+        format!("{}/api/b/{}/t/{}/m", host_url(port), board_id, thread_id)
     }
 }

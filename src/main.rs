@@ -25,4 +25,5 @@ fn main() {
     let gateway = DataGateway::new(Box::new(adapter));
 
     Server::start(3000, gateway);
+    println!("finish");
 }
