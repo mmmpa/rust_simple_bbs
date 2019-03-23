@@ -1,36 +1,28 @@
 import { FormEvent, useState } from 'react';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { createThread } from '../store/actions';
+import { createMessage } from '../store/actions';
 
+type P = { threadId: string };
+const mapDispatchToProps = { createMessage };
 
-const mapDispatchToProps = { createThread };
-
-type Mapped = typeof mapDispatchToProps;
+type Mapped = P & typeof mapDispatchToProps;
 
 export default connect(
   null,
   mapDispatchToProps,
-)(function ThreadCreation ({ createThread }: Mapped): JSX.Element {
-  const [title, setTitle] = useState('');
+)(function MessageCreation ({ threadId, createMessage }: Mapped): JSX.Element {
   const [message, setMessage] = useState('');
 
   function submit (e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    createThread({ title, message });
+    createMessage({ threadId, message });
   }
 
   return (
     <div>
       <h1>new Thread</h1>
       <form onSubmit={submit}>
-        <label>title</label>
-        <input
-          type="text"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-        />
         <label>first message</label>
         <textarea
           value={message}
@@ -41,3 +33,4 @@ export default connect(
     </div>
   );
 });
+

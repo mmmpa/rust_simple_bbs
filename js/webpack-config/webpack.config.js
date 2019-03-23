@@ -79,7 +79,16 @@ if (isDevMode) {
       contentBase: path.join(__dirname, '../dist'),
       compress: true,
       port: DEV_SERVER_PORT,
-      historyApiFallback: true,
+      historyApiFallback: {
+        rewrites: [
+          {
+            from: /.*/,
+            to: function () {
+              return 'index.html';
+            },
+          },
+        ],
+      },
     },
   });
 }

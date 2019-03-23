@@ -8,11 +8,14 @@ type Mapped = ReturnType<typeof mapStateToProps>;
 
 export default connect(
   mapStateToProps,
-)(({ threadIndex }: Mapped): JSX.Element => (
-  <div className='Box Box--condensed'>
-    {threadIndex.summaries.map(t => <Row {...t} />)}
-  </div>
-));
+)(function ThreadIndexTable ({ threadIndex }: Mapped): JSX.Element {
+  return (
+    <div className='Box Box--condensed'>
+      <h1>Table</h1>
+      {threadIndex.summaries.map(t => <Row {...t} key={t.id} />)}
+    </div>
+  );
+});
 
 function Row (props: ThreadSummary): JSX.Element {
   return (

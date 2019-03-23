@@ -1,9 +1,11 @@
 import * as React from 'react';
+import { ThreadItem as T } from '../types';
 
-export default function ThreadItem (): JSX.Element {
+export default function ThreadItem ({ index, html: __html }: T): JSX.Element {
   return (
-    <div>
-      <h1>Thread body</h1>
-    </div>
+    <>
+      <h1>{index}</h1>
+      <div dangerouslySetInnerHTML={{ __html }} />
+    </>
   );
 }

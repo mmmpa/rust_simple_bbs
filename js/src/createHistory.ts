@@ -30,8 +30,7 @@ export default function createHistory ({ window, routes, pathname }: A) {
     setTimeout(() => window.scrollTo(x, y));
   }
 
-  function prefetch ({ to: toRaw, done, failed }: PrefetchPayload): void {
-    const to = toRaw.replace(/^\//, '') || '';
+  function prefetch ({ to, done, failed }: PrefetchPayload): void {
     const matched = routes.find(c => !!matchPath(to, c));
 
     if (!matched || !matched.prefetch) {

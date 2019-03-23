@@ -56,19 +56,25 @@ export type ThreadIndex = {
 }
 
 export type ThreadBody = {
+  id: string
   title: string
   head: number
   tail: number
-  items: ThreadItem[]
+  messages: ThreadItem[]
 }
 
 export type ThreadItem = {
   index: number
   name: string
   email: string
-  body: string
+  html: string
   mentioned: number[]
   mention: number[]
+}
+
+export type ThreadCreationParams = {
+  title: string
+  message: string
 }
 
 export type Actions = typeof actions

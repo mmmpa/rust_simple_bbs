@@ -4,7 +4,6 @@
     "module": "commonjs",
     "sourceMap": true,
     "jsx": "react",
-    "jsxFactory": "React.createElement",
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "noImplicitThis": true,

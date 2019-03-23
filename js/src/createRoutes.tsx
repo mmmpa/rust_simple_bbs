@@ -28,30 +28,33 @@ function insertAnalyser (props: CustomRouteProps): CustomRouteProps {
 export default function createRoutes ({ store }): [CustomRouteProps[], Route[]] {
   const routes: CustomRouteProps[] = [
     {
-      path: '',
+      path: '/',
       component: LandingPage,
       exact: true,
       prefetch: payload => store.dispatch(indexThread(payload)),
     },
     {
-      path: 'threads_new',
+      path: '/threads/new',
       exact: true,
       component: ThreadCreation,
       prefetch: payload => store.dispatch(indexThread(payload)),
     },
     {
-      path: 'threads',
+      path: '/threads',
       exact: true,
       component: ThreadIndex,
     },
     {
-      path: 'threads/:thread_id',
+      path: '/threads/:thread_id',
+      exact: true,
       component: ThreadBody,
       prefetch: payload => store.dispatch(showThread(payload)),
     },
     {
-      path: 'threads/:thread_id/:comment_range',
+      path: '/threads/:thread_id/:comment_range',
+      exact: true,
       component: ThreadBody,
+      prefetch: payload => store.dispatch(showThread(payload)),
     },
   ].map(insertAnalyser);
 

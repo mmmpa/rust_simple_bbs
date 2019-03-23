@@ -122,6 +122,7 @@ module.exports = {
     'no-shadow': 0,
     'import/named': 'off',
     'typescript/explicit-function-return-type': 'off',
+    'prefer-arrow-callback': 'off'
   },
   overrides: {
     files: ['**/*.ts', '**/*.tsx'],

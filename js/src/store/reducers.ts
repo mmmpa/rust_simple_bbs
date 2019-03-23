@@ -1,5 +1,5 @@
 import { AppState, PreFetchStatus, ThreadBody, ThreadIndex } from '../types';
-import { FAIL_PREFETCH, FINISH_PREFETCH, INDEX_THREAD, START_PREFETCH, UPDATE_THREAD_BODY, UPDATE_THREAD_INDEX, UPDATE_TRANSITION_ID } from './actions';
+import { FAIL_PREFETCH, FINISH_PREFETCH, START_PREFETCH, UPDATE_THREAD_BODY, UPDATE_THREAD_INDEX, UPDATE_TRANSITION_ID } from './actions';
 
 function threadBody (state: ThreadBody = {} as ThreadBody, action): ThreadBody {
   switch (action.type) {
@@ -12,8 +12,6 @@ function threadBody (state: ThreadBody = {} as ThreadBody, action): ThreadBody {
 
 function threadIndex (state: ThreadIndex = {} as ThreadIndex, action): ThreadIndex {
   switch (action.type) {
-  case INDEX_THREAD:
-    return action.payload;
   case UPDATE_THREAD_INDEX:
     return action.payload;
   default:
