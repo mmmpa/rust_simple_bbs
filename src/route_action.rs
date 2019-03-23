@@ -33,7 +33,7 @@ impl RouteAction {
     pub fn show_board(c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
 
-        match c.api.read().unwrap().show_board(board_id) {
+        match c.api.show_board(board_id) {
             Err(m) => bad_params(m),
             Ok(board) => Ok(Response::with((status::Ok, board.to_json()))),
         }
@@ -43,7 +43,7 @@ impl RouteAction {
         let board_id = c.params.get("board_id").unwrap();
         let thread_id = c.params.get("thread_id").unwrap();
 
-        match c.api.read().unwrap().show_thread(board_id, thread_id, 0..10000) {
+        match c.api.show_thread(board_id, thread_id, 0..10000) {
             Err(m) => bad_params(m),
             Ok(thread) => Ok(Response::with((status::Ok, thread.to_json()))),
         }
@@ -57,7 +57,7 @@ impl RouteAction {
             Err(_m) => return invalid_params()
         };
 
-        match c.api.write().unwrap().create_board(&body.title) {
+        match c.api.create_board(&body.title) {
             Ok(id) => Ok(Response::with((status::Ok, id))),
             Err(m) => bad_params(m)
         }
@@ -76,7 +76,7 @@ impl RouteAction {
             Err(_m) => return invalid_params()
         };
 
-        match c.api.write().unwrap().create_thread(&board_id, &title, &message) {
+        match c.api.create_thread(&board_id, &title, &message) {
             Ok(id) => Ok(Response::with((status::Ok, id))),
             Err(m) => bad_params(m)
         }
@@ -95,7 +95,7 @@ impl RouteAction {
             Err(_m) => return invalid_params()
         };
 
-        match c.api.write().unwrap().create_message(&board_id, &thread_id, &message) {
+        match c.api.create_message(&board_id, &thread_id, &message) {
             Ok(_) => Ok(Response::with(status::Ok)),
             Err(m) => bad_params(m)
         }

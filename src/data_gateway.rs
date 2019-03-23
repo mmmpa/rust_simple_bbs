@@ -41,14 +41,14 @@ impl DataGateway {
         Ok(BoardThread::retrieve(locked, title, messages))
     }
 
-    pub fn create_board(&mut self, title: &str) -> Result<String, String> {
+    pub fn create_board(&self, title: &str) -> Result<String, String> {
         if title.len() == 0 {
             return Err("title required".to_string());
         }
         self.adapter.create_board(BoardCreationParams { title })
     }
 
-    pub fn create_thread(&mut self, board_id: &str, title: &str, message: &str) -> Result<String, String> {
+    pub fn create_thread(&self, board_id: &str, title: &str, message: &str) -> Result<String, String> {
         self.adapter.create_thread(
             ThreadCreationParams {
                 board_id,
@@ -58,7 +58,7 @@ impl DataGateway {
         )
     }
 
-    pub fn create_message(&mut self, board_id: &str, board_thread_id: &str, message: &str) -> Result<(), String> {
+    pub fn create_message(&self, board_id: &str, board_thread_id: &str, message: &str) -> Result<(), String> {
         self.adapter.create_message(
             message_to_params(board_id, board_thread_id, &ThreadMessage::from_raw(message)?)
         )?;
@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn test_create_board() {
         let adapter = JsonAdapter::new("test_create_board_gate", true);
-        let mut gate = DataGateway::new(Box::new(adapter));
+        let gate = DataGateway::new(Box::new(adapter));
         let board_id = &gate.create_board("test_create_board_gate").unwrap();
         let board = &gate.show_board(board_id).unwrap();
 
@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn test_create_thread() {
         let adapter = JsonAdapter::new("test_create_thread_gate", true);
-        let mut gate = DataGateway::new(Box::new(adapter));
+        let gate = DataGateway::new(Box::new(adapter));
         let board_id = &gate.create_board("test_create_thread_gate").unwrap();
 
         let board_thread_id_1 = &gate.create_thread(
@@ -145,7 +145,7 @@ mod tests {
     #[test]
     fn test_create_messages() {
         let adapter = JsonAdapter::new("test_create_messages_gate", true);
-        let mut gate = DataGateway::new(Box::new(adapter));
+        let gate = DataGateway::new(Box::new(adapter));
         let board_id = &gate.create_board("test_create_messages_gate").unwrap();
         let board_thread_id = &gate.create_thread(
             board_id,

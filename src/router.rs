@@ -5,12 +5,12 @@ use iron::status;
 use crate::data_gateway::DataGateway;
 use self::iron::Handler;
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc};
 use self::iron::method::Method;
 use crate::url_separation::Matcher;
 use std::hash::Hash;
 
-type Api = Arc<RwLock<DataGateway>>;
+type Api = Arc<DataGateway>;
 
 type Routes<T> = HashMap<
     Method,
@@ -42,7 +42,7 @@ impl<T: 'static + Clone + Send + Sync + Hash + Eq> Router<T> {
         routes.insert(Method::Delete, HashMap::new());
 
         Router {
-            api: Arc::new(RwLock::new(gateway)),
+            api: Arc::new(gateway),
             routes,
             matcher: Matcher::new(None),
         }
