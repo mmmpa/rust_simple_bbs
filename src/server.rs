@@ -9,7 +9,7 @@ use self::iron::prelude::Iron;
 pub struct Server {}
 
 impl Server {
-    pub fn start(gateway: DataGateway) {
+    pub fn start(port: u16, gateway: DataGateway) {
         let mut router: Router<&str> = Router::new(gateway);
 
         router.add_route(Method::Get, "show root", "/", RouteAction::show_root);
@@ -21,6 +21,6 @@ impl Server {
         router.add_route(Method::Post, "create thread", "b/:board_id/t", RouteAction::create_thread);
         router.add_route(Method::Post, "create message", "b/:board_id/t/:thread_id/m", RouteAction::create_message);
 
-        Iron::new(router).http("localhost:3000").unwrap();
+        Iron::new(router).http(format!("localhost:{}", port)).unwrap();
     }
 }

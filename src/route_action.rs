@@ -26,9 +26,10 @@ struct MessageCreationParams {
 }
 
 impl RouteAction {
-    pub fn show_root(c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
+    pub fn show_root(_c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
         Ok(Response::with((status::Ok, "root")))
     }
+
     pub fn show_board(c: &mut RouteContext, _req: &mut Request<'_, '_>) -> IronResult<Response> {
         let board_id = c.params.get("board_id").unwrap();
 
@@ -42,7 +43,7 @@ impl RouteAction {
         let board_id = c.params.get("board_id").unwrap();
         let thread_id = c.params.get("thread_id").unwrap();
 
-        match c.api.read().unwrap().show_thread(board_id, thread_id, 0..100) {
+        match c.api.read().unwrap().show_thread(board_id, thread_id, 0..10000) {
             Err(m) => bad_params(m),
             Ok(thread) => Ok(Response::with((status::Ok, thread.to_json()))),
         }

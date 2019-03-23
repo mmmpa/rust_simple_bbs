@@ -88,11 +88,9 @@ fn swap_vec<T>(a: &mut Vec<T>) -> Vec<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_adapter::TestAdapter;
     use crate::data_gateway::DataGateway;
     use crate::board::ThreadInformation;
     use crate::board_thread::BoardThread;
-    use crate::thread_message::ThreadMessage;
     use crate::json_adapter::JsonAdapter;
 
     #[test]

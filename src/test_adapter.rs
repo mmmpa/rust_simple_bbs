@@ -283,7 +283,7 @@ impl TestAdapter {
 #[cfg(test)]
 mod tests {
     use crate::test_adapter::TestAdapter;
-    use crate::data_gateway_adapter::{DataGatewayAdapter, MessageCreationParams, ThreadCreationParams, BoardCreationParams, RawThreadInformation, RawThread};
+    use crate::data_gateway_adapter::{MessageCreationParams, ThreadCreationParams, BoardCreationParams, RawThreadInformation, RawThread};
 
     #[test]
     fn test_create_board() {
