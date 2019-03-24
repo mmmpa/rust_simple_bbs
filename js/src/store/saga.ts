@@ -1,7 +1,7 @@
 import { SagaIterator } from 'redux-saga';
 import { call, put, takeLatest } from 'redux-saga/effects';
 import Registry from '../Registry';
-import { Actions, PrefetchAction } from '../types';
+import { Actions } from '../types';
 import { CREATE_MESSAGE, CREATE_THREAD, failPrefetch, finishPrefetch, INDEX_THREAD, SHOW_THREAD, startPrefetch, updateThreadBody, updateThreadIndex } from './actions';
 
 function indexThreadCall (_: any): Promise<any> {
@@ -22,7 +22,7 @@ function* indexThread (action: ReturnType<Actions['indexThread']>): SagaIterator
   }
 }
 
-function showThreadCall ({ payload: { params: { thread_id: threadId } } }: PrefetchAction): Promise<any> {
+function showThreadCall ({ threadId }): Promise<any> {
   return Registry.api.showThread({ threadId });
 }
 
@@ -30,7 +30,7 @@ function* showThread (action: ReturnType<Actions['showThread']>): SagaIterator {
   yield put(startPrefetch());
 
   try {
-    const payload = yield call(showThreadCall, action);
+    const payload = yield call(showThreadCall, { threadId: action.payload.params.thread_id });
     yield put(updateThreadBody(payload));
     yield put(finishPrefetch());
     action.payload.done();
@@ -46,7 +46,6 @@ function createThreadCall ({ payload: { title, message } }): Promise<any> {
 
 function* createThread (action: ReturnType<Actions['createThread']>): SagaIterator {
   yield put(startPrefetch());
-
   try {
     yield call(createThreadCall, action);
   } catch (e) {
@@ -60,9 +59,10 @@ function createMessageCall ({ payload: { threadId, message } }): Promise<any> {
 
 function* createMessage (action: ReturnType<Actions['createMessage']>): SagaIterator {
   yield put(startPrefetch());
-
   try {
     yield call(createMessageCall, action);
+    const payload = yield call(showThreadCall, { threadId: action.payload.threadId });
+    yield put(updateThreadBody(payload));
   } catch (e) {
     console.error(e);
   }

@@ -12,6 +12,11 @@ export const SHOW_THREAD = 'SHOW_THREAD';
 export const UPDATE_THREAD_BODY = 'UPDATE_THREAD_BODY';
 export const UPDATE_TRANSITION_ID = 'UPDATE_TRANSITION_ID';
 
+export const UPDATE_THREAD_PARAMS = 'UPDATE_THREAD_PARAMS';
+export const RESET_THREAD_PARAMS = 'RESET_THREAD_PARAMS';
+export const UPDATE_MESSAGE_PARAMS = 'UPDATE_MESSAGE_PARAMS';
+export const RESET_MESSAGE_PARAMS = 'RESET_MESSAGE_PARAMS';
+
 export function updateTransitionId (payload): AnyAction {
   return { type: UPDATE_TRANSITION_ID, payload };
 }

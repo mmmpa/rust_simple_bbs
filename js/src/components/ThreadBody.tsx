@@ -18,7 +18,7 @@ export default connect(
     <div>
       <h1>Thread: {title}</h1>
       {itemsElement(messages)}
-      <MessageCreation />
+      <MessageCreation threadId={id} />
     </div>
   );
 });

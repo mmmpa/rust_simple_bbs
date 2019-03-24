@@ -2,14 +2,9 @@ import { RouteProps } from 'react-router';
 import { Store } from 'redux';
 import { Api } from './clientSideApi';
 import * as actions from './store/actions';
+import { defaultState } from './store/reducers';
 
-export type AppState = {
-  transitionId: string
-  prefetchStatus: PreFetchStatus,
-  title: string
-  threadIndex: ThreadIndex,
-  threadBody: ThreadBody
-}
+export type AppState = typeof defaultState;
 
 export type Registry = {
   api: Api
@@ -40,7 +35,7 @@ export type PrefetchAction = {
 }
 
 export type PreFetchStatus = {
-  type: 'started' | 'finished' | 'failed'
+  type: 'ready' | 'started' | 'finished' | 'failed'
   message: string
 }
 
@@ -74,6 +69,10 @@ export type ThreadItem = {
 
 export type ThreadCreationParams = {
   title: string
+  message: string
+}
+
+export type MessageCreationParams = {
   message: string
 }
 
