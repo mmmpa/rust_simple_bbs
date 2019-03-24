@@ -55,6 +55,7 @@ export default function createHistory ({ window, routes, pathname }: A) {
         location.pathname = to;
         delayListener.emit('popstate');
         scroll(id);
+        console.log('done')
       },
       failed: (e: Error) => {
         console.error(e);
@@ -76,9 +77,9 @@ export default function createHistory ({ window, routes, pathname }: A) {
     return () => delayListener.removeListener('popstate', f);
   }
 
-  const onPopState = ({ state: { id } }: PopStateEvent) => {
+  const onPopState = ({ state }: PopStateEvent) => {
     storePosition();
-    currentId = id;
+    currentId = (state || {}).id;
 
     transit();
   };

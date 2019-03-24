@@ -2,7 +2,7 @@ import { SagaIterator } from 'redux-saga';
 import { call, put, takeLatest, select } from 'redux-saga/effects';
 import Registry from '../Registry';
 import { Actions, AppState } from '../types';
-import { CREATE_MESSAGE, CREATE_THREAD, failPrefetch, finishPrefetch, INDEX_THREAD, resetMessage, SHOW_THREAD, startPrefetch, updateThreadBody, updateThreadIndex } from './actions';
+import { CREATE_MESSAGE, CREATE_THREAD, failPrefetch, finishPrefetch, INDEX_THREAD, resetMessage, resetThread, SHOW_THREAD, startPrefetch, updateThreadBody, updateThreadIndex } from './actions';
 
 function indexThreadCall (_: any): Promise<any> {
   return Registry.api.indexThreads();
@@ -45,9 +45,12 @@ function createThreadCall ({ payload: { title, message } }): Promise<any> {
 }
 
 function* createThread (action: ReturnType<Actions['createThread']>): SagaIterator {
+  const state: AppState = yield select();
   yield put(startPrefetch());
   try {
-    yield call(createThreadCall, action);
+    const threadId = yield call(createThreadCall, { payload: state.threadParams });
+    Registry.history.push(`threads/${threadId}`);
+    yield put(resetThread());
   } catch (e) {
     console.error(e);
   }

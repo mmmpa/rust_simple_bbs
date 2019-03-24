@@ -1,24 +1,24 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent } from 'react';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { createThread } from '../store/actions';
+import { createThread, updateThread } from '../store/actions';
+import { AppState } from '../types';
 
 
-const mapDispatchToProps = { createThread };
-
-type Mapped = typeof mapDispatchToProps;
+const mapDispatchToProps = { createThread, updateThread };
+const mapStateToProps = (state: AppState) => ({ threadParams: state.threadParams });
+type Mapped = ReturnType<typeof mapStateToProps> & typeof mapDispatchToProps;
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps,
-)(function ThreadCreation ({ createThread }: Mapped): JSX.Element {
-  const [title, setTitle] = useState('');
-  const [message, setMessage] = useState('');
+)(function ThreadCreation ({ createThread, threadParams, updateThread }: Mapped): JSX.Element {
+  const { title, message } = threadParams;
 
   function submit (e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    createThread({ title, message });
+    createThread();
   }
 
   return (
@@ -29,12 +29,12 @@ export default connect(
         <input
           type='text'
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={e => updateThread({ ...threadParams, title: e.target.value })}
         />
         <label>first message</label>
         <textarea
           value={message}
-          onChange={e => setMessage(e.target.value)}
+          onChange={e => updateThread({ ...threadParams, message: e.target.value })}
         />
         <button type='submit'>submit</button>
       </form>

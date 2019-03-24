@@ -1,6 +1,7 @@
 import { RouteProps } from 'react-router';
 import { Store } from 'redux';
 import { Api } from './clientSideApi';
+import createHistory from './createHistory';
 import * as actions from './store/actions';
 
 export const defaultState = {
@@ -19,6 +20,7 @@ export type Registry = {
   api: Api
   routes: CustomRouteProps[]
   store: Store<AppState>
+  history: ReturnType<typeof createHistory>
 }
 
 export type CustomRouteProps = RouteProps & {

@@ -51,6 +51,7 @@ function prefetchStatus (state = ds.prefetchStatus, action): AppState['prefetchS
 }
 
 function threadParams (state = ds.threadParams, action): AppState['threadParams'] {
+  console.log(action)
   switch (action.type) {
   case UPDATE_THREAD_PARAMS:
     return action.payload;

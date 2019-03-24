@@ -11,13 +11,13 @@ import createStore from './store';
 function start (window): void {
   const store = createStore();
   const [routes, AppRoutes] = createRoutes({ store });
+  const { pathname } = window.location;
+  const history = createHistory({ window, routes, pathname });
 
   Registry.routes = routes;
   Registry.store = store;
   Registry.api = createApi();
-
-  const { pathname } = window.location;
-  const history = createHistory({ window, routes, pathname });
+  Registry.history = history;
 
   const App = createApp({
     history,

@@ -45,8 +45,8 @@ export function showThread (payload: RoutePrefetchPayload): PrefetchAction {
   return { type: SHOW_THREAD, payload };
 }
 
-export function createThread (payload) {
-  return { type: CREATE_THREAD, payload };
+export function createThread () {
+  return { type: CREATE_THREAD };
 }
 
 export function createMessage (payload) {

@@ -34,10 +34,9 @@ export default function createRoutes ({ store }): [CustomRouteProps[], Route[]] 
       prefetch: payload => store.dispatch(indexThread(payload)),
     },
     {
-      path: '/threads/new',
+      path: '/new_thread',
       exact: true,
       component: ThreadCreation,
-      prefetch: payload => store.dispatch(indexThread(payload)),
     },
     {
       path: '/threads',
