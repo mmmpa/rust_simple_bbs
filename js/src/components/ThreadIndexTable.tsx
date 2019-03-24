@@ -10,8 +10,7 @@ export default connect(
   mapStateToProps,
 )(function ThreadIndexTable ({ threadIndex }: Mapped): JSX.Element {
   return (
-    <div className='Box Box--condensed'>
-      <h1>Table</h1>
+    <div className='thread_list'>
       {threadIndex.summaries.map(t => <Row {...t} key={t.id} />)}
     </div>
   );
@@ -19,13 +18,9 @@ export default connect(
 
 function Row (props: ThreadSummary): JSX.Element {
   return (
-    <Link className='Box-row block' to={`/threads/${props.id}`}>
-      <div className='TableObject-item TableObject-item--primary'>
-        {props.title}
-      </div>
-      <div className='TableObject-item'>
-        {props.count}
-      </div>
+    <Link className='thread_list__item' to={`/threads/${props.id}`}>
+      <i className="fa fa-link link--black mr-1 text--small"/>
+      {props.title}
     </Link>
   );
 }

@@ -4,7 +4,7 @@ import ThreadIndexTable from './ThreadIndexTable';
 export default function LandingPage (): JSX.Element {
   return (
     <div>
-      <h1>Landing page</h1>
+      <h1 className="common__title">Thread list</h1>
       <ThreadIndexTable />
     </div>
   );

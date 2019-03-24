@@ -15,9 +15,11 @@ export default connect(
   mapStateToProps,
 )(function ThreadBody ({ threadBody: { title, messages, id } }: Mapped): JSX.Element {
   return (
-    <div className="thread_page">
-      <h1 className="thread_page__title">Title: {title}</h1>
-      {itemsElement(messages)}
+    <div className='thread_page'>
+      <h1 className="common__title">Title: {title}</h1>
+      <div className='thread_page__messages'>
+        {itemsElement(messages)}
+      </div>
       <MessageCreation threadId={id} />
     </div>
   );

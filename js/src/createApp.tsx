@@ -11,8 +11,8 @@ export default function createApp ({ history, store, AppRoutes }): () => JSX.Ele
         <Provider store={store}>
           <div className='app_container'>
             <GlobalHeader />
-            <div className="global_content">
-              <div className="global_content__wrapper">
+            <div className='global_content'>
+              <div className='global_content__wrapper'>
                 {AppRoutes}
               </div>
             </div>

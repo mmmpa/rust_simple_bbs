@@ -6,7 +6,7 @@ export default function GlobalFooter (): JSX.Element {
       <div className='gloal_footer_navigation'>
         <ul>
           <li>
-            <a className="link--white" href='https://twitter.com/mmmpa/'>@mmmpa</a>
+            <a className='link--white' href='https://twitter.com/mmmpa/'>@mmmpa</a>
           </li>
         </ul>
       </div>

@@ -7,18 +7,22 @@ export default function GlobalHeader (): JSX.Element {
 
   return (
     <div className='global_header'>
-      <h1>STBBS</h1>
-      <div className='gloal_header_navigation'>
-        <ul>
-          <li>
-            <Link className="link--white" to='/'>Thread list</Link>
-          </li>
-          <li>
-            <Link className="link--white" to='/new_thread'>Create a new thread</Link>
-          </li>
-          <li>{clock}</li>
-        </ul>
-      </div>
+      <h1 className="global_header__title">STBBS</h1>
+      <ul className='global_header__navigation'>
+        <li className='global_header__navigation__item'>
+          <Link className='link--white' to='/'>
+            <i className="fa fa-list mr-1" />
+            Thread list
+          </Link>
+        </li>
+        <li className='global_header__navigation__item'>
+          <Link className='link--white' to='/new_thread'>
+            <i className="fa fa-plus-circle mr-1" />
+            Create a new thread
+          </Link>
+        </li>
+        <li className='global_header__navigation__item--clock'>{clock}</li>
+      </ul>
     </div>
   );
 }

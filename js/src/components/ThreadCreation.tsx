@@ -22,21 +22,31 @@ export default connect(
   }
 
   return (
-    <div>
-      <h1>new Thread</h1>
-      <form onSubmit={submit}>
-        <label>title</label>
-        <input
-          type='text'
-          value={title}
-          onChange={e => updateThread({ ...threadParams, title: e.target.value })}
-        />
-        <label>first message</label>
-        <textarea
-          value={message}
-          onChange={e => updateThread({ ...threadParams, message: e.target.value })}
-        />
-        <button type='submit'>submit</button>
+    <div className="new_thread">
+      <h1 className="common__title">Create a new thread</h1>
+      <form className="new_thread__form" onSubmit={submit}>
+        <div className="new_thread__title">
+          <label className="common__label">Title</label>
+          <input
+            type='text'
+            value={title}
+            onChange={e => updateThread({ ...threadParams, title: e.target.value })}
+          />
+        </div>
+        <div className="new_thread__message">
+          <label className="common__label">First message</label>
+          <textarea
+            className="new_thread__message__input"
+            value={message}
+            onChange={e => updateThread({ ...threadParams, message: e.target.value })}
+          />
+        </div>
+        <div className="new_thread__submit">
+          <button className="common__submit common--w100" type='submit'>
+            <i className="fa fa-plus-circle mr-1" />
+            Create !
+          </button>
+        </div>
       </form>
     </div>
   );

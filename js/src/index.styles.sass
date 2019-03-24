@@ -1,5 +1,9 @@
 @import "primer/index.scss"
 
+input[type="text"],
+textarea
+  @extend .form-control
+
 .block
   display: block
 
@@ -14,49 +18,98 @@
   height: 100%
 
 .global_content
+  display: flex
   flex: 1 0
+  @extend .pt-4, .pb-4
+  width: 100%
 
   &__wrapper
-    max-width: 800px
+    display: flex
+    flex: 0 0 800px
     margin: 0 auto
 
-.thread_page
+.common
+  @mixin common_button
+    @extend .pt-2, .pb-2
+    border: 0
+    border-radius: 3px
+    color: #fff
+    font-weight: bold
+
   &__title
-    @extend .mt-4, .pb-1
+    @extend .pb-1
     border-bottom: #ccc 1px solid
 
-  &__message
-    @extend .pt-4, .pb-4, .pl-4, .pr-4
-    display: flex
+  &__submit
+    @include common_button
+    background: $green
 
-    &:nth-child(2n)
-      background: #f3f3f3
+  &__label
+    @extend .mb-1
+    display: block
+
+  &--w100
+    width: 100%
+
+.text
+  &--small
+    font-size: 0.75rem
+
+.thread_list
+  @extend .mt-3
+
+  &__item
+    @extend .mr-4, .mb-2
+    display: inline-block
+    white-space: nowrap
+
+.thread_page
+  flex: 1 0 0
+  display: flex
+  flex-direction: column
+
+  &__message
+    @extend .mt-4, .mb-4
+    display: block
 
     &__index
-      font-size: 1rem
+      @extend .mb-6
+      height: 2rem
+      line-height: 2rem
+      font-size: 2rem
+      border-bottom: 1px solid #666
+
+      &__inner
+        @extend .pr-2
+        display: inline-block
+        background: #fff
+        position: relative
+        bottom: -1rem
 
     &__body
-      @extend .pl-4
+      @import "github"
+
+  &__messages
+    flex: 1 0
+
+  &__form
+    @extend .pt-4
+    flex: 0 0
 
 .message_form
   width: 100%
 
-  form
-    display: flex
-
   &__input_area
+    @extend .pb-2
     display: block
     width: 100%
     flex: 10 0 100px
     align-self: flex-end
 
-  &__label
-    display: block
-
   &__message
     width: 100%
-    margin: 0
     vertical-align: middle
+    height: 300px
 
   &__button_area
     align-self: flex-end
@@ -66,19 +119,63 @@
     width: 100%
 
 .global_header
-  padding-left: 1rem
+  @extend .pl-4, .pr-4
   flex: 0 0 50px
   background: #000
   color: #fff
   line-height: 50px
   display: flex
 
-  ul
-    display: flex
+  &__title
+    flex: 0 0 0
+    @extend .mr-4
 
-    li
-      display: block
-      margin-left: 1rem
+  &__navigation
+    display: flex
+    width: 100%
+
+    @mixin item__common
+      list-style: none
+      white-space: nowrap
+      flex: 0 0 0
+
+    &__item
+      @include item__common
+      @extend .mr-3
+
+      &--clock
+        @include item__common
+        flex: 2 0 0
+        text-align: right
+
+.new_thread
+  flex: 1 0 0
+  flex-direction: column
+  display: flex
+
+  &__form
+    flex: 1 0 0
+    display: flex
+    flex-direction: column
+
+  &__title
+    @extend .mt-2
+    flex: 0 0 0
+    display: flex
+    flex-direction: column
+
+  &__message
+    @extend .mt-2
+    flex: 1 0 0
+    display: flex
+    flex-direction: column
+
+    &__input
+      flex: 1 0 0
+
+  &__submit
+    @extend .mt-2
+    flex: 0 0 0
 
 .global_footer
   display: block
@@ -97,3 +194,6 @@
 .link
   &--white
     color: #fff
+
+  &--black
+    color: #000
