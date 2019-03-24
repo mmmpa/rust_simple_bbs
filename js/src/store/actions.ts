@@ -53,6 +53,22 @@ export function createMessage (payload) {
   return { type: CREATE_MESSAGE, payload };
 }
 
+export function updateThread (payload) {
+  return { type: UPDATE_THREAD_PARAMS, payload };
+}
+
+export function updateMessage (payload) {
+  return { type: UPDATE_MESSAGE_PARAMS, payload };
+}
+
+export function resetThread () {
+  return { type: RESET_THREAD_PARAMS };
+}
+
+export function resetMessage () {
+  return { type: RESET_MESSAGE_PARAMS };
+}
+
 export function updateThreadBody (payload): AnyAction {
   return { type: UPDATE_THREAD_BODY, payload };
 }

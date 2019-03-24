@@ -26,7 +26,7 @@ impl ThreadMessage {
     }
 
     pub fn from_raw(raw: &str) -> Result<ThreadMessage, String> {
-        let (html, single_anchors, range_anchors) = MessageArrangement::execute(raw)?;
+        let (html, single_anchors, range_anchors) = MessageArrangement::execute(raw, true)?;
 
         Ok(ThreadMessage { raw: raw.to_string(), html, single_anchors, range_anchors, ..ThreadMessage::default() })
     }
@@ -37,15 +37,8 @@ fn test_render() {
     let m = ThreadMessage::from_raw("").unwrap();
     assert_eq!(m.html, "");
 
-    let m = ThreadMessage::from_raw(r###"
-        >1
-        >01
-        >10
-    "###).unwrap();
-    assert_eq!(m.html, r###"
-        <a href="#1">&gt;1</a>
-        <a href="#1">&gt;1</a>
-        <a href="#10">&gt;10</a>
-    "###);
+    let m = ThreadMessage::from_raw(r###">1"###).unwrap();
+    assert_eq!(m.html, r###"<p><a href="#1">&gt;1</a></p>
+"###);
 }
 

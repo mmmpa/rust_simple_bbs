@@ -9,7 +9,7 @@ pub struct Board {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ThreadSummary {
     pub title: String,
-    pub board_thread_id: String,
+    pub id: String,
 }
 
 impl Board {

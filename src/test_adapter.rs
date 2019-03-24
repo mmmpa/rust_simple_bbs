@@ -43,7 +43,6 @@ struct BoardSchema {
 
 impl Drop for TestAdapter {
     fn drop(&mut self) {
-        println!("drop");
         if self.auto_sweeping {
             fs::remove_dir_all(&self.logs_root_path).unwrap();
         }
@@ -179,7 +178,7 @@ impl TestAdapter {
             RawBoard {
                 title: board.title,
                 summaries: board.summaries.iter_mut().map(|ThreadSchema { title, board_thread_id }|
-                  RawThreadSummary { title: swap_string(title), board_thread_id: swap_string(board_thread_id) }
+                  RawThreadSummary { title: swap_string(title), id: swap_string(board_thread_id) }
                 ).collect()
             }
         )
@@ -331,12 +330,12 @@ mod tests {
         let raw_board = adapter.show_board(board_id).unwrap();
         assert_eq!(raw_board.summaries.len(), 2);
 
-        let RawThreadSummary { title, board_thread_id } = &raw_board.summaries[0];
-        assert_eq!(*board_thread_id, board_thread_id_1);
+        let RawThreadSummary { title, id } = &raw_board.summaries[0];
+        assert_eq!(*id, board_thread_id_1);
         assert_eq!(title, "test_create_thread_1");
 
-        let RawThreadSummary { title, board_thread_id } = &raw_board.summaries[1];
-        assert_eq!(*board_thread_id, board_thread_id_2);
+        let RawThreadSummary { title, id } = &raw_board.summaries[1];
+        assert_eq!(*id, board_thread_id_2);
         assert_eq!(title, "test_create_thread_2");
 
         let RawThread { locked, title, messages } = adapter.show_thread(&board_id, &board_thread_id_1, 0..100).unwrap();

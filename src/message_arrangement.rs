@@ -1,5 +1,9 @@
+extern crate pulldown_cmark;
+
 use std::str::FromStr;
 use crate::common_error::OrError;
+use self::pulldown_cmark::Parser;
+use self::pulldown_cmark::html::push_html;
 
 pub struct MessageArrangement<'a> {
     raw_body: &'a str,
@@ -39,7 +43,7 @@ impl<'a> MessageArrangement<'a> {
         }
     }
 
-    pub fn execute(raw_body: &str) -> Result<(String, Vec<usize>, Vec<(usize, usize)>), String> {
+    pub fn execute(raw_body: &str, with_md: bool) -> Result<(String, Vec<usize>, Vec<(usize, usize)>), String> {
         let mut anchor = MessageArrangement::new(raw_body);
 
         for (i, c) in raw_body.bytes().enumerate() {
@@ -61,7 +65,16 @@ impl<'a> MessageArrangement<'a> {
         anchor.step(raw_body.len())?;
         anchor.fill(raw_body.len());
 
-        Ok((anchor.result, anchor.single_anchors, anchor.range_anchors))
+        match with_md {
+            false => Ok((anchor.result, anchor.single_anchors, anchor.range_anchors)),
+            true => {
+                let parser = Parser::new(&anchor.result);
+                let mut html_buf = String::with_capacity(anchor.result.len() * 2);
+                push_html(&mut html_buf, parser);
+
+                Ok((html_buf, anchor.single_anchors, anchor.range_anchors))
+            },
+        }
     }
 
     fn start_picking(&mut self, now: usize) -> Result<(), String> {
@@ -161,7 +174,7 @@ impl<'a> MessageArrangement<'a> {
         Ok(())
     }
 
-    fn accumulate(&mut self, _now: usize, c: char)-> Result<(), String> {
+    fn accumulate(&mut self, _now: usize, c: char) -> Result<(), String> {
         match self.state {
             EscapeState::PickingStarter => {
                 self.num_string.push(c);
@@ -186,7 +199,7 @@ fn test_escape_and_anchor() {
     let s = r###"
         aaa<bbb>11ccc
     "###;
-    let (result, _, _) = MessageArrangement::execute(s).unwrap();
+    let (result, _, _) = MessageArrangement::execute(s, false).unwrap();
     assert_eq!(result, r###"
         aaa&lt;bbb<a href="#11">&gt;11</a>ccc
     "###);
@@ -199,7 +212,7 @@ fn test_escape_and_anchor() {
         >100>100
     "###;
 
-    let (result, single, range) = MessageArrangement::execute(s).unwrap();
+    let (result, single, range) = MessageArrangement::execute(s, false).unwrap();
     assert_eq!(result, r###"
         &gt;&gt;&gt;<a href="#22">&gt;22</a>
         <a href="#100-200">&gt;100-200</a>

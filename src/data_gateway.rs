@@ -16,10 +16,10 @@ impl DataGateway {
 
     pub fn show_board(&self, board_id: &str) -> Result<Board, String> {
         let RawBoard { mut title, mut summaries } = self.adapter.show_board(board_id)?;
-        let threads = summaries.iter_mut().map(|RawThreadSummary { title, board_thread_id }| {
+        let threads = summaries.iter_mut().map(|RawThreadSummary { title, id }| {
             ThreadSummary {
                 title: swap_string(title),
-                board_thread_id: swap_string(board_thread_id),
+                id: swap_string(id),
             }
         }).collect();
         let board = Board::retrieve(swap_string(&mut title), threads);
@@ -123,12 +123,12 @@ mod tests {
         let board = &gate.show_board(board_id).unwrap();
         assert_eq!(board.summaries.len(), 2);
 
-        let ThreadSummary { title, board_thread_id } = &board.summaries[0];
-        assert_eq!(board_thread_id, board_thread_id_1);
+        let ThreadSummary { title, id } = &board.summaries[0];
+        assert_eq!(id, board_thread_id_1);
         assert_eq!(title, "test_create_thread_1");
 
-        let ThreadSummary { title, board_thread_id } = &board.summaries[1];
-        assert_eq!(board_thread_id, board_thread_id_2);
+        let ThreadSummary { title, id } = &board.summaries[1];
+        assert_eq!(id, board_thread_id_2);
         assert_eq!(title, "test_create_thread_2");
 
         let BoardThread { locked, title, messages } = &gate.show_thread(&board_id, &board_thread_id_1, 0..100).unwrap();

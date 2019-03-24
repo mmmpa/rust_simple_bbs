@@ -2,7 +2,16 @@ import { RouteProps } from 'react-router';
 import { Store } from 'redux';
 import { Api } from './clientSideApi';
 import * as actions from './store/actions';
-import { defaultState } from './store/reducers';
+
+export const defaultState = {
+  transitionId: '',
+  prefetchStatus: {} as PreFetchStatus,
+  title: '',
+  threadIndex: {} as ThreadIndex,
+  threadBody: {} as ThreadBody,
+  threadParams: {} as ThreadCreationParams,
+  messageParams: {} as MessageCreationParams,
+};
 
 export type AppState = typeof defaultState;
 

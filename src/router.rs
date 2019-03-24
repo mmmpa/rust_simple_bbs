@@ -9,7 +9,8 @@ use std::sync::{Arc};
 use self::iron::method::Method;
 use crate::url_separation::Matcher;
 use std::hash::Hash;
-use iron::headers::AccessControlAllowOrigin;
+use iron::headers::{AccessControlAllowOrigin, AccessControlAllowHeaders};
+use unicase::UniCase;
 
 type Api = Arc<DataGateway>;
 
@@ -61,7 +62,7 @@ impl<T: 'static + Clone + Send + Sync + Hash + Eq> Handler for Router<T> {
         // TODO(mmmpa): move to middleware.
         if req.method == Method::Options {
             let mut res = Response::with(status::Ok);
-            res.headers.set(AccessControlAllowOrigin::Any);
+            set_headers(&mut res);
             return Ok(res);
         }
 
@@ -83,12 +84,22 @@ impl<T: 'static + Clone + Send + Sync + Hash + Eq> Handler for Router<T> {
         } {
             // TODO(mmmpa): move to middleware.
             Ok(mut res) => {
-                res.headers.set(AccessControlAllowOrigin::Any);
+                set_headers(&mut res);
                 Ok(res)
             },
             Err(e) => Err(e),
         }
     }
+}
+
+fn set_headers(res: &mut Response) {
+    res.headers.set(AccessControlAllowOrigin::Any);
+    res.headers.set(
+        AccessControlAllowHeaders(vec![
+            UniCase("Content-Type".to_owned()),
+            UniCase("date".to_owned()),
+        ])
+    );
 }
 
 pub trait CustomHandler: Send + Sync + 'static {

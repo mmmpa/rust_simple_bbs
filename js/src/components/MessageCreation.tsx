@@ -1,18 +1,20 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent } from 'react';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { createMessage } from '../store/actions';
+import { createMessage, updateMessage } from '../store/actions';
+import { AppState } from '../types';
 
 type P = { threadId: string };
-const mapDispatchToProps = { createMessage };
+const mapStateToProps = (state: AppState) => ({ messageParams: state.messageParams });
+const mapDispatchToProps = { createMessage, updateMessage };
 
-type Mapped = P & typeof mapDispatchToProps;
+type Mapped = P & ReturnType<typeof mapStateToProps> & typeof mapDispatchToProps;
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps,
-)(function MessageCreation ({ threadId, createMessage }: Mapped): JSX.Element {
-  const [message, setMessage] = useState('');
+)(function MessageCreation ({ threadId, createMessage, updateMessage, messageParams }: Mapped): JSX.Element {
+  const { message } = messageParams;
 
   function submit (e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,7 +28,10 @@ export default connect(
         <label>first message</label>
         <textarea
           value={message}
-          onChange={e => setMessage(e.target.value)}
+          onChange={e => {
+            console.log(e.target.value)
+            updateMessage(e.target.value)
+          }}
         />
         <button type="submit">submit</button>
       </form>

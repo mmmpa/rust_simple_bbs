@@ -30,7 +30,7 @@ pub struct RawThread {
 #[derive(Debug)]
 pub struct RawThreadSummary {
     pub title: String,
-    pub board_thread_id: String,
+    pub id: String,
 }
 
 #[derive(Debug)]
