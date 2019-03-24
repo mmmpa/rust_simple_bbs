@@ -9,9 +9,13 @@ export default function createApp ({ history, store, AppRoutes }): () => JSX.Ele
     return (
       <Router history={history}>
         <Provider store={store}>
-          <div className='container'>
+          <div className='app_container'>
             <GlobalHeader />
-            {AppRoutes}
+            <div className="global_content">
+              <div className="global_content__wrapper">
+                {AppRoutes}
+              </div>
+            </div>
             <GlobalFooter />
           </div>
         </Provider>

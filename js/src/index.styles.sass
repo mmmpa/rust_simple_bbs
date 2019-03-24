@@ -2,3 +2,98 @@
 
 .block
   display: block
+
+.app_container
+  position: absolute
+  top: 0
+  bottom: 0
+  left: 0
+  right: 0
+  display: flex
+  flex-direction: column
+  height: 100%
+
+.global_content
+  flex: 1 0
+
+  &__wrapper
+    max-width: 800px
+    margin: 0 auto
+
+.thread_page
+  &__title
+    @extend .mt-4, .pb-1
+    border-bottom: #ccc 1px solid
+
+  &__message
+    @extend .pt-4, .pb-4, .pl-4, .pr-4
+    display: flex
+
+    &:nth-child(2n)
+      background: #f3f3f3
+
+    &__index
+      font-size: 1rem
+
+    &__body
+      @extend .pl-4
+
+.message_form
+  width: 100%
+
+  form
+    display: flex
+
+  &__input_area
+    display: block
+    width: 100%
+    flex: 10 0 100px
+    align-self: flex-end
+
+  &__label
+    display: block
+
+  &__message
+    width: 100%
+    margin: 0
+    vertical-align: middle
+
+  &__button_area
+    align-self: flex-end
+    flex: 0 0 150px
+
+  &__submit
+    width: 100%
+
+.global_header
+  padding-left: 1rem
+  flex: 0 0 50px
+  background: #000
+  color: #fff
+  line-height: 50px
+  display: flex
+
+  ul
+    display: flex
+
+    li
+      display: block
+      margin-left: 1rem
+
+.global_footer
+  display: block
+  flex: 0 0 50px
+  background: #000
+  color: #fff
+  line-height: 50px
+
+  ul
+    display: flex
+
+    li
+      display: block
+      margin-left: 1rem
+
+.link
+  &--white
+    color: #fff

@@ -22,15 +22,22 @@ export default connect(
   }
 
   return (
-    <div>
-      <h1>new Thread</h1>
+    <div className="message_form">
       <form onSubmit={submit}>
-        <label>first message</label>
-        <textarea
-          value={message}
-          onChange={e => updateMessage({ message: e.target.value })}
-        />
-        <button type='submit'>submit</button>
+        <div className="message_form__input_area">
+          <label className="message_form__label">message</label>
+          <textarea
+            className="message_form__message"
+            value={message}
+            onChange={e => updateMessage({ message: e.target.value })}
+          />
+        </div>
+        <div className="message_form__button_area">
+          <button
+            className="message_form__submit"
+            type='submit'>submit
+          </button>
+        </div>
       </form>
     </div>
   );
