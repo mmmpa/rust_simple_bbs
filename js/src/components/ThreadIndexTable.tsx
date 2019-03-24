@@ -19,7 +19,7 @@ export default connect(
 function Row (props: ThreadSummary): JSX.Element {
   return (
     <Link className='thread_list__item' to={`/threads/${props.id}`}>
-      <i className="fa fa-link link--black mr-1 text--small"/>
+      <i className='fa fa-link link--black mr-1 text--small' />
       {props.title}
     </Link>
   );

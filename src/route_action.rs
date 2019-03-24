@@ -6,6 +6,7 @@ use iron::prelude::*;
 use iron::status;
 use crate::router::RouteContext;
 use crate::to_json::ToJson;
+use crate::common_error::BoxedError;
 
 pub struct RouteAction;
 
@@ -106,6 +107,6 @@ fn invalid_params() -> IronResult<Response> {
     Ok(Response::with((status::BadRequest, "invalid params format")))
 }
 
-fn bad_params(message: String) -> IronResult<Response> {
-    Ok(Response::with((status::BadRequest, message)))
+fn bad_params(message: BoxedError) -> IronResult<Response> {
+    Ok(Response::with((status::BadRequest, fotmat!("{:?}", self.stacking))))
 }

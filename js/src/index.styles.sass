@@ -1,4 +1,5 @@
 @import "primer/index.scss"
+@import "codemirror"
 
 input[type="text"],
 textarea
@@ -197,3 +198,21 @@ textarea
 
   &--black
     color: #000
+
+.CodeMirror
+  &-wrap
+    border: 1px solid #eee
+    flex: 1 0 0
+
+  .cm-header
+    color: $green
+    font-size: 1.2em
+
+  .cm-quote
+    color: $green
+
+  .cm-negative
+    color: $orange
+
+  .cm-link
+    color: $blue

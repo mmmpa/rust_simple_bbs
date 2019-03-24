@@ -16,7 +16,7 @@ export default connect(
 )(function ThreadBody ({ threadBody: { title, messages, id } }: Mapped): JSX.Element {
   return (
     <div className='thread_page'>
-      <h1 className="common__title">Title: {title}</h1>
+      <h1 className='common__title'>Title: {title}</h1>
       <div className='thread_page__messages'>
         {itemsElement(messages)}
       </div>

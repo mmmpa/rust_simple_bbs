@@ -1,6 +1,7 @@
 import { FormEvent } from 'react';
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { useCodemirror } from '../libs/codemirrorHelpers';
 import { createMessage, updateMessage } from '../store/actions';
 import { AppState } from '../types';
 
@@ -21,6 +22,9 @@ export default connect(
     createMessage({ threadId });
   }
 
+  const events = { change: e => updateMessage({ message: e.doc.getValue() }) };
+  const setView = useCodemirror({ value: message, events, width: '100%', height: 300 });
+
   return (
     <div className='thread_page__form'>
       <form onSubmit={submit}>
@@ -28,13 +32,13 @@ export default connect(
           <label className='common__label'>New message</label>
           <textarea
             className='message_form__message'
-            value={message}
-            onChange={e => updateMessage({ message: e.target.value })}
+            defaultValue={message}
+            ref={setView}
           />
         </div>
         <div className='message_form__button_area'>
-          <button className="common__submit common--w100" type='submit'>
-            <i className="fa fa-plus-circle mr-1" />
+          <button className='common__submit common--w100' type='submit'>
+            <i className='fa fa-plus-circle mr-1' />
             Submit !
           </button>
         </div>

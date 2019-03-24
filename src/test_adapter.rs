@@ -12,7 +12,7 @@ use std::fs::OpenOptions;
 use std::time::SystemTime;
 use std::fs;
 use std::mem::{replace};
-use crate::common_error::OrError;
+use crate::common_error::{OrError, BoxedError, CommonError};
 
 #[derive(Debug)]
 pub struct TestAdapter {
@@ -68,11 +68,14 @@ impl TestAdapter {
         }
     }
 
-    fn check_path(path: String, exists: bool) -> Result<String, String> {
+    fn check_path(path: String, exists: bool) -> Result<String, BoxedError> {
         if Path::new(&path).exists() == exists {
             Ok(path)
         } else {
-            Err(format!("{}'s exists is not {:?}", path, exists))
+            let mut boxed_error = CommonError::new("");
+            boxed_error.push("system", &format!("{}'s exists is not {:?}", path, exists));
+
+            Err(Box::new(boxed_error))
         }
     }
 
@@ -88,22 +91,22 @@ impl TestAdapter {
         format!("{}/{}/{}.log", self.logs_root_path, board_id, thread_id)
     }
 
-    fn check_board_path(&self, board_id: &str, exists: bool) -> Result<String, String> {
+    fn check_board_path(&self, board_id: &str, exists: bool) -> Result<String, BoxedError> {
         let path = self.generate_board_path(board_id);
         Self::check_path(path, exists)
     }
 
-    fn check_board_info_path(&self, board_id: &str, exists: bool) -> Result<String, String> {
+    fn check_board_info_path(&self, board_id: &str, exists: bool) -> Result<String, BoxedError> {
         let path = self.generate_board_info_path(board_id);
         Self::check_path(path, exists)
     }
 
-    fn check_thread_log_path(&self, board_id: &str, thread_id: &str, exists: bool) -> Result<String, String> {
+    fn check_thread_log_path(&self, board_id: &str, thread_id: &str, exists: bool) -> Result<String, BoxedError> {
         let path = self.generate_thread_log_path(board_id, thread_id);
         Self::check_path(path, exists)
     }
 
-    fn register_thread(&self, board_id: &str, board_thread_id: &str, title: &str) -> Result<(), String> {
+    fn register_thread(&self, board_id: &str, board_thread_id: &str, title: &str) -> Result<(), BoxedError> {
         let mut board = self.read_board_schema(board_id)?;
         board.summaries.push(
             ThreadSchema {
@@ -116,36 +119,36 @@ impl TestAdapter {
         Ok(())
     }
 
-    fn read_board_schema(&self, board_id: &str) -> Result<BoardSchema, String> {
+    fn read_board_schema(&self, board_id: &str) -> Result<BoardSchema, BoxedError> {
         let path = self.generate_board_info_path(board_id);
-        let json = fs::read_to_string(path).or_err("broken info file")?;
+        let json = fs::read_to_string(path).or_err("system", "broken info file")?;
         let schema: BoardSchema = serde_json::from_str(&json).unwrap();
 
         Ok(schema)
     }
 
-    fn write_board_schema(&self, schema: &BoardSchema) -> Result<(), String> {
+    fn write_board_schema(&self, schema: &BoardSchema) -> Result<(), BoxedError> {
         let path = self.generate_board_info_path(&schema.board_id);
-        let board_json = serde_json::to_string(&schema).or_err("parse error")?;
-        fs::write(path, board_json).or_err("board schema write error")?;
+        let board_json = serde_json::to_string(&schema).or_err("system", "parse error")?;
+        fs::write(path, board_json).or_err("system", "board schema write error")?;
 
         Ok(())
     }
 
-    fn params_to_row(message: &MessageCreationParams<'_>) -> Result<String, String> {
+    fn params_to_row(message: &MessageCreationParams<'_>) -> Result<String, BoxedError> {
         let message = MessageRow {
             raw: Self::san(message.raw),
             html: Self::san(message.html),
             single_anchors: message.single_anchors.iter().map(|n| format!("{}", n)).collect::<Vec<String>>().join(","),
             range_anchors: message.range_anchors.iter().map(|(h, e)| format!("{}-{}", h, e)).collect::<Vec<String>>().join(","),
         };
-        let json = serde_json::to_string(&message).or_err("parse error")?;
+        let json = serde_json::to_string(&message).or_err("system", "parse error")?;
 
         Ok(format!("{}\n", json))
     }
 
-    fn row_to_raw(index: usize, raw: &str) -> Result<RawMessage, String> {
-        let mut message: MessageRow = serde_json::from_str(raw).or_err("parse error")?;
+    fn row_to_raw(index: usize, raw: &str) -> Result<RawMessage, BoxedError> {
+        let mut message: MessageRow = serde_json::from_str(raw).or_err("system", "parse error")?;
         let raw = RawMessage {
             index,
             raw: swap_string(&mut message.raw),
@@ -158,12 +161,7 @@ impl TestAdapter {
     }
 
     fn san(string: &str) -> String {
-        let mut result = String::with_capacity(string.len());
-        string.chars().for_each(|c| match c {
-            '\n' => (),
-            _ => result.push(c),
-        });
-        result
+        string.to_string()
     }
 
     fn generate_id() -> String {
@@ -171,7 +169,7 @@ impl TestAdapter {
         format!("{:?}_{}", t, Uuid::new_v4().to_string())
     }
 
-    pub fn show_board(&self, board_id: &str) -> Result<RawBoard, String> {
+    pub fn show_board(&self, board_id: &str) -> Result<RawBoard, BoxedError> {
         let mut board = self.read_board_schema(board_id)?;
 
         Ok(
@@ -184,10 +182,10 @@ impl TestAdapter {
         )
     }
 
-    pub fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, String> {
+    pub fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, BoxedError> {
         let path = self.check_thread_log_path(board_id, thread_id, true)?;
         let thread = File::open(path)
-          .or_err("unknown error")?;
+          .or_err("system", "unknown error")?;
         let mut lines = BufReader::new(thread).lines();
 
         let locked = lines.next()
@@ -196,7 +194,7 @@ impl TestAdapter {
 
         let title = lines.next()
           .expect("log format error (no lines)")
-          .or_err("log format error (no title)")?;
+          .or_err("system", "log format error (no title)")?;
 
         let messages = lines
           .enumerate()
@@ -211,7 +209,7 @@ impl TestAdapter {
         Ok(RawThread { locked, title, messages })
     }
 
-    pub fn create_board(&mut self, params: BoardCreationParams<'_>) -> Result<String, String> {
+    pub fn create_board(&mut self, params: BoardCreationParams<'_>) -> Result<String, BoxedError> {
         let board_id = Self::generate_id();
         let schema = BoardSchema {
             board_id: board_id.clone(),
@@ -220,7 +218,7 @@ impl TestAdapter {
         };
 
         let path = self.check_board_path(&board_id, false)?;
-        fs::create_dir(&path).or_err("board create error")?;
+        fs::create_dir(&path).or_err("system", "board create error")?;
 
         self.check_board_info_path(&board_id, false)?;
         self.write_board_schema(&schema)?;
@@ -228,26 +226,26 @@ impl TestAdapter {
         Ok(board_id)
     }
 
-    pub fn create_thread(&mut self, params: ThreadCreationParams<'_>) -> Result<String, String> {
+    pub fn create_thread(&mut self, params: ThreadCreationParams<'_>) -> Result<String, BoxedError> {
         let new_thread_id = Self::generate_id();
 
         let path = self.check_thread_log_path(params.board_id, &new_thread_id, false)?;
         let mut thread = OpenOptions::new().create(true).append(true).open(path)
-          .or_err("thread open error")?;
+          .or_err("system", "thread open error")?;
 
         let title = Self::san(params.title);
         let first_row = Self::params_to_row(&params.first_message)?;
 
         write!(thread, "{}", format!("\n{}\n{}", title, first_row)).unwrap();
-        self.register_thread(params.board_id, &new_thread_id, params.title).or_err("registration error")?;
+        self.register_thread(params.board_id, &new_thread_id, params.title).or_err("system", "registration error")?;
 
         Ok(new_thread_id)
     }
 
-    pub fn create_message(&mut self, params: MessageCreationParams<'_>) -> Result<String, String> {
+    pub fn create_message(&mut self, params: MessageCreationParams<'_>) -> Result<String, BoxedError> {
         let path = self.check_thread_log_path(params.board_id, params.board_thread_id, true)?;
         let mut thread = OpenOptions::new().read(true).append(true).open(path)
-          .or_err("thread open error")?;
+          .or_err("system", "thread open error")?;
 
         let mut lines = BufReader::new(&thread).lines();
 
@@ -256,25 +254,25 @@ impl TestAdapter {
           .expect("log format error (no locked)") != "";
 
         if locked {
-            return Err("locked".to_string());
+            return Err(CommonError::new_boxed("system", "locked"));
         }
 
         let row = Self::params_to_row(&params)?;
 
         write!(thread, "{}", row)
-          .or_err("message write error")?;
+          .or_err("system", "message write error")?;
 
         Ok(params.board_thread_id.to_string())
     }
 
-    pub fn lock_thread(&mut self, board_id: &str, thread_id: &str) -> Result<(), String> {
+    pub fn lock_thread(&mut self, board_id: &str, thread_id: &str) -> Result<(), BoxedError> {
         let path = self.check_thread_log_path(board_id, thread_id, true)?;
         let mut thread = OpenOptions::new().write(true).open(path)
-          .or_err("thread open error")?;
+          .or_err("system", "thread open error")?;
 
-        thread.seek(std::io::SeekFrom::Start(0)).or_err("lock file failure")?;
+        thread.seek(std::io::SeekFrom::Start(0)).or_err("system", "lock file failure")?;
         write!(thread, "{}", "locked\n")
-          .or_err("message write error")?;
+          .or_err("system", "message write error")?;
 
         Ok(())
     }
@@ -392,14 +390,14 @@ mod tests {
         let RawThread { messages, .. } = adapter.show_thread(&board_id, &board_thread_id, 0..100).unwrap();
         assert_eq!(messages.len(), 3);
         assert_eq!(messages[1].raw, "message_1");
-        assert_eq!(messages[2].raw, "message_2");
+        assert_eq!(messages[2].raw, "message\n_2");
 
         let RawThread { messages, .. } = adapter.show_thread(&board_id, &board_thread_id, 1..2).unwrap();
         assert_eq!(messages.len(), 1);
         assert_eq!(messages[0].raw, "message_1");
 
         let RawThread { messages, .. } = adapter.show_thread(&board_id, &board_thread_id, 2..100).unwrap();
-        assert_eq!(messages[0].raw, "message_2");
+        assert_eq!(messages[0].raw, "message\n_2");
 
         adapter.lock_thread(board_id, &board_thread_id).unwrap();
 

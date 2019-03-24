@@ -66,8 +66,10 @@
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
+    "@types/codemirror": "^0.0.72",
     "axios": "^0.18.0",
     "classnames": "^2.2.6",
+    "codemirror": "^5.45.0",
     "history": "^4.7.2",
     "path-to-regexp": "^3.0.0",
     "primer": "^11.0.0",

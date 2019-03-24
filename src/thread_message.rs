@@ -26,6 +26,10 @@ impl ThreadMessage {
     }
 
     pub fn from_raw(raw: &str) -> Result<ThreadMessage, String> {
+        if raw.len() == 0 {
+            return Err("message is required".to_string());
+        }
+
         let (html, single_anchors, range_anchors) = MessageArrangement::execute(raw, true)?;
 
         Ok(ThreadMessage { raw: raw.to_string(), html, single_anchors, range_anchors, ..ThreadMessage::default() })
@@ -34,7 +38,7 @@ impl ThreadMessage {
 
 #[test]
 fn test_render() {
-    let m = ThreadMessage::from_raw("").unwrap();
+    let m = ThreadMessage::from_raw(" ").unwrap();
     assert_eq!(m.html, "");
 
     let m = ThreadMessage::from_raw(r###">1"###).unwrap();

@@ -1,14 +1,15 @@
 use std::ops::Range;
+use crate::common_error::BoxedError;
 
 pub trait DataGatewayAdapter: Send + Sync {
-    fn show_board(&self, board_id: &str) -> Result<RawBoard, String>;
-    fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, String>;
+    fn show_board(&self, board_id: &str) -> Result<RawBoard, BoxedError>;
+    fn show_thread(&self, board_id: &str, thread_id: &str, range: Range<usize>) -> Result<RawThread, BoxedError>;
 
-    fn create_board(&self, params: BoardCreationParams<'_>) -> Result<String, String>;
-    fn create_thread(&self, params: ThreadCreationParams<'_>) -> Result<String, String>;
-    fn create_message(&self, params: MessageCreationParams<'_>) -> Result<String, String>;
+    fn create_board(&self, params: BoardCreationParams<'_>) -> Result<String, BoxedError>;
+    fn create_thread(&self, params: ThreadCreationParams<'_>) -> Result<String, BoxedError>;
+    fn create_message(&self, params: MessageCreationParams<'_>) -> Result<String, BoxedError>;
 
-    fn close_thread(&self, board_id: &str, thread_id: &str) -> Result<(), String>;
+    fn close_thread(&self, board_id: &str, thread_id: &str) -> Result<(), BoxedError>;
 }
 
 #[derive(Debug)]

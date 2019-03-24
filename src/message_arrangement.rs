@@ -1,7 +1,7 @@
 extern crate pulldown_cmark;
 
 use std::str::FromStr;
-use crate::common_error::OrError;
+use crate::common_error::{OrError, BoxedError};
 use self::pulldown_cmark::Parser;
 use self::pulldown_cmark::html::push_html;
 
@@ -107,13 +107,13 @@ impl<'a> MessageArrangement<'a> {
         self.result.push_str(&self.raw_body[self.last as usize..now]);
     }
 
-    fn step(&mut self, now: usize) -> Result<(), String> {
+    fn step(&mut self, now: usize) -> Result<(), BoxedError> {
         match self.state {
             EscapeState::PickingStarter => {
                 self.result.push_str("&gt;");
             },
             EscapeState::PickingStarterHavingNum => {
-                self.start = usize::from_str(&self.num_string).or_err("invalid num")?;
+                self.start = usize::from_str(&self.num_string).or_err("system", "invalid num")?;
                 self.result.push_str(
                     &format!(
                         r###"<a href="#{0:?}">&gt;{0:?}</a>"###,
@@ -134,7 +134,7 @@ impl<'a> MessageArrangement<'a> {
                 self.reset(now);
             },
             EscapeState::PickingFinisherHavingNum => {
-                self.end = usize::from_str(&self.num_string).or_err("invalid num")?;
+                self.end = usize::from_str(&self.num_string).or_err("system", "invalid num")?;
                 self.result.push_str(
                     &format!(
                         r###"<a href="#{0:?}-{1:?}">&gt;{0:?}-{1:?}</a>"###,
@@ -162,7 +162,7 @@ impl<'a> MessageArrangement<'a> {
     fn start_range(&mut self, now: usize) -> Result<(), String> {
         match self.state {
             EscapeState::PickingStarterHavingNum => {
-                self.start = usize::from_str(&self.num_string).or_err("invalid num")?;
+                self.start = usize::from_str(&self.num_string).or_err("system", "invalid num")?;
                 self.num_string.clear();
                 self.state = EscapeState::PickingFinisher;
             },
