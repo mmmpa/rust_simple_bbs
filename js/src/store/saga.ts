@@ -1,8 +1,8 @@
 import { SagaIterator } from 'redux-saga';
-import { call, put, takeLatest } from 'redux-saga/effects';
+import { call, put, takeLatest, select } from 'redux-saga/effects';
 import Registry from '../Registry';
-import { Actions } from '../types';
-import { CREATE_MESSAGE, CREATE_THREAD, failPrefetch, finishPrefetch, INDEX_THREAD, SHOW_THREAD, startPrefetch, updateThreadBody, updateThreadIndex } from './actions';
+import { Actions, AppState } from '../types';
+import { CREATE_MESSAGE, CREATE_THREAD, failPrefetch, finishPrefetch, INDEX_THREAD, resetMessage, SHOW_THREAD, startPrefetch, updateThreadBody, updateThreadIndex } from './actions';
 
 function indexThreadCall (_: any): Promise<any> {
   return Registry.api.indexThreads();
@@ -58,9 +58,11 @@ function createMessageCall ({ payload: { threadId, message } }): Promise<any> {
 }
 
 function* createMessage (action: ReturnType<Actions['createMessage']>): SagaIterator {
+  const state: AppState = yield select();
   yield put(startPrefetch());
   try {
-    yield call(createMessageCall, action);
+    yield call(createMessageCall, { payload: { ...action.payload, ...state.messageParams } });
+    yield put(resetMessage());
     const payload = yield call(showThreadCall, { threadId: action.payload.threadId });
     yield put(updateThreadBody(payload));
   } catch (e) {

@@ -27,7 +27,7 @@ export default connect(
       <form onSubmit={submit}>
         <label>title</label>
         <input
-          type="text"
+          type='text'
           value={title}
           onChange={e => setTitle(e.target.value)}
         />
@@ -36,7 +36,7 @@ export default connect(
           value={message}
           onChange={e => setMessage(e.target.value)}
         />
-        <button type="submit">submit</button>
+        <button type='submit'>submit</button>
       </form>
     </div>
   );

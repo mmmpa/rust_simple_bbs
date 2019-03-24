@@ -16,9 +16,9 @@ export default connect(
 )(function MessageCreation ({ threadId, createMessage, updateMessage, messageParams }: Mapped): JSX.Element {
   const { message } = messageParams;
 
-  function submit (e: FormEvent<HTMLFormElement>) {
+  function submit (e: FormEvent) {
     e.preventDefault();
-    createMessage({ threadId, message });
+    createMessage({ threadId });
   }
 
   return (
@@ -28,12 +28,9 @@ export default connect(
         <label>first message</label>
         <textarea
           value={message}
-          onChange={e => {
-            console.log(e.target.value)
-            updateMessage(e.target.value)
-          }}
+          onChange={e => updateMessage({ message: e.target.value })}
         />
-        <button type="submit">submit</button>
+        <button type='submit'>submit</button>
       </form>
     </div>
   );

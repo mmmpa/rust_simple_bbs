@@ -9,8 +9,8 @@ export const defaultState = {
   title: '',
   threadIndex: {} as ThreadIndex,
   threadBody: {} as ThreadBody,
-  threadParams: {} as ThreadCreationParams,
-  messageParams: {} as MessageCreationParams,
+  threadParams: { message: '', title: '' } as ThreadCreationParams,
+  messageParams: { message: '' } as MessageCreationParams,
 };
 
 export type AppState = typeof defaultState;

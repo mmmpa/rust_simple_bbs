@@ -1,5 +1,5 @@
 import { AppState, defaultState as ds } from '../types';
-import { FAIL_PREFETCH, FINISH_PREFETCH, START_PREFETCH, UPDATE_MESSAGE_PARAMS, UPDATE_THREAD_BODY, UPDATE_THREAD_INDEX, UPDATE_THREAD_PARAMS, UPDATE_TRANSITION_ID } from './actions';
+import { FAIL_PREFETCH, FINISH_PREFETCH, RESET_MESSAGE_PARAMS, RESET_THREAD_PARAMS, START_PREFETCH, UPDATE_MESSAGE_PARAMS, UPDATE_THREAD_BODY, UPDATE_THREAD_INDEX, UPDATE_THREAD_PARAMS, UPDATE_TRANSITION_ID } from './actions';
 
 function title (state = ds.title, action): AppState['title'] {
   switch (action.type) {
@@ -54,6 +54,8 @@ function threadParams (state = ds.threadParams, action): AppState['threadParams'
   switch (action.type) {
   case UPDATE_THREAD_PARAMS:
     return action.payload;
+  case RESET_THREAD_PARAMS:
+    return { ...ds.threadParams };
   default:
     return state;
   }
@@ -63,6 +65,8 @@ function messageParams (state = ds.messageParams, action): AppState['messagePara
   switch (action.type) {
   case UPDATE_MESSAGE_PARAMS:
     return action.payload;
+  case RESET_MESSAGE_PARAMS:
+    return { ...ds.messageParams };
   default:
     return state;
   }
