@@ -44,7 +44,7 @@ impl DataGateway {
 
     pub fn create_board(&self, title: &str) -> Result<String, BoxedError> {
         if title.len() == 0 {
-            return Err(Err(CommonError::new_boxed("title", "required")));
+            return Err(CommonError::new_boxed("title", "required"));
         }
         self.adapter.create_board(BoardCreationParams { title })
     }

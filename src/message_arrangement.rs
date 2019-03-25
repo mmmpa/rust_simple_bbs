@@ -43,7 +43,7 @@ impl<'a> MessageArrangement<'a> {
         }
     }
 
-    pub fn execute(raw_body: &str, with_md: bool) -> Result<(String, Vec<usize>, Vec<(usize, usize)>), String> {
+    pub fn execute(raw_body: &str, with_md: bool) -> Result<(String, Vec<usize>, Vec<(usize, usize)>), BoxedError> {
         let mut anchor = MessageArrangement::new(raw_body);
 
         for (i, c) in raw_body.bytes().enumerate() {
@@ -77,7 +77,7 @@ impl<'a> MessageArrangement<'a> {
         }
     }
 
-    fn start_picking(&mut self, now: usize) -> Result<(), String> {
+    fn start_picking(&mut self, now: usize) -> Result<(), BoxedError> {
         match self.state {
             EscapeState::PickingStarter => {
                 self.result.push_str("&gt;");
@@ -94,7 +94,7 @@ impl<'a> MessageArrangement<'a> {
         Ok(())
     }
 
-    fn escape_lt(&mut self, now: usize) -> Result<(), String> {
+    fn escape_lt(&mut self, now: usize) -> Result<(), BoxedError> {
         self.step(now)?;
         self.fill(now);
         self.result.push_str("&lt;");
@@ -159,7 +159,7 @@ impl<'a> MessageArrangement<'a> {
         self.last = now;
     }
 
-    fn start_range(&mut self, now: usize) -> Result<(), String> {
+    fn start_range(&mut self, now: usize) -> Result<(), BoxedError> {
         match self.state {
             EscapeState::PickingStarterHavingNum => {
                 self.start = usize::from_str(&self.num_string).or_err("system", "invalid num")?;
@@ -174,7 +174,7 @@ impl<'a> MessageArrangement<'a> {
         Ok(())
     }
 
-    fn accumulate(&mut self, _now: usize, c: char) -> Result<(), String> {
+    fn accumulate(&mut self, _now: usize, c: char) -> Result<(), BoxedError> {
         match self.state {
             EscapeState::PickingStarter => {
                 self.num_string.push(c);

@@ -1,5 +1,6 @@
 use crate::message_arrangement::MessageArrangement;
 use serde::{Deserialize, Serialize};
+use crate::common_error::{CommonError, BoxedError};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ThreadMessage {
@@ -25,9 +26,9 @@ impl ThreadMessage {
         }
     }
 
-    pub fn from_raw(raw: &str) -> Result<ThreadMessage, String> {
+    pub fn from_raw(raw: &str) -> Result<ThreadMessage, BoxedError> {
         if raw.len() == 0 {
-            return Err("message is required".to_string());
+            return Err(CommonError::new_boxed("message", "required"));
         }
 
         let (html, single_anchors, range_anchors) = MessageArrangement::execute(raw, true)?;

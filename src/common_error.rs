@@ -21,10 +21,10 @@ impl CommonError {
                 self.stacking.insert(key.to_string(), vec![value.to_string()]);
             },
         };
-        self.details = fotmat!("{:?}", self.stacking);
+        self.details = format!("{:?}", self.stacking);
     }
 
-    pub fn new_boxed(key: &str, value: &str) -> BoxedError {
+    pub fn new_boxed(key: &str, error: &str) -> BoxedError {
         let mut boxed_error = CommonError::new("");
         boxed_error.push(key, error);
         Box::new(boxed_error)
