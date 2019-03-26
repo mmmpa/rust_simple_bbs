@@ -32,6 +32,12 @@ export function useCodemirror ({ value, events, width, height }: useCodemirrorP)
   }, [view]);
 
   useEffect(() => {
+    if (cm && !value) {
+      cm.getDoc().setValue('');
+    }
+  }, [value]);
+
+  useEffect(() => {
     if (!cm) {
       return;
     }

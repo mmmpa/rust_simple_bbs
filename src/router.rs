@@ -9,8 +9,6 @@ use std::sync::{Arc};
 use self::iron::method::Method;
 use crate::url_separation::Matcher;
 use std::hash::Hash;
-use iron::headers::{AccessControlAllowOrigin, AccessControlAllowHeaders};
-use unicase::UniCase;
 
 type Api = Arc<DataGateway>;
 
@@ -59,47 +57,25 @@ impl<T: 'static + Clone + Send + Sync + Hash + Eq> Router<T> {
 
 impl<T: 'static + Clone + Send + Sync + Hash + Eq> Handler for Router<T> {
     fn handle(&self, req: &mut Request<'_, '_>) -> IronResult<Response> {
-        // TODO(mmmpa): move to middleware.
         if req.method == Method::Options {
-            let mut res = Response::with(status::Ok);
-            set_headers(&mut res);
-            return Ok(res);
+            return Ok(Response::with(status::Ok));
         }
 
-        match {
-            match self.matcher.pick(&req.url.path()) {
-                None => Ok(Response::with(status::NotFound)),
-                Some((key, params)) => {
-                    match self.routes.get(&req.method).unwrap().get(&key) {
-                        None => Ok(Response::with(status::NotFound)),
-                        Some(handler) => {
-                            let api = self.api.clone();
-                            let mut context = RouteContext { params, api };
+        match self.matcher.pick(&req.url.path()) {
+            None => Ok(Response::with(status::NotFound)),
+            Some((key, params)) => {
+                match self.routes.get(&req.method).unwrap().get(&key) {
+                    None => Ok(Response::with(status::NotFound)),
+                    Some(handler) => {
+                        let api = self.api.clone();
+                        let mut context = RouteContext { params, api };
 
-                            handler.handle(&mut context, req)
-                        },
-                    }
+                        handler.handle(&mut context, req)
+                    },
                 }
             }
-        } {
-            // TODO(mmmpa): move to middleware.
-            Ok(mut res) => {
-                set_headers(&mut res);
-                Ok(res)
-            },
-            Err(e) => Err(e),
         }
     }
-}
-
-fn set_headers(res: &mut Response) {
-    res.headers.set(AccessControlAllowOrigin::Any);
-    res.headers.set(
-        AccessControlAllowHeaders(vec![
-            UniCase("Content-Type".to_owned()),
-            UniCase("date".to_owned()),
-        ])
-    );
 }
 
 pub trait CustomHandler: Send + Sync + 'static {

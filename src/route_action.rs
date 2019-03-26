@@ -108,5 +108,5 @@ fn invalid_params() -> IronResult<Response> {
 }
 
 fn bad_params(message: BoxedError) -> IronResult<Response> {
-    Ok(Response::with((status::BadRequest, format!("{:?}", message))))
+    Ok(Response::with((status::BadRequest, format!("{:?}", message.stacking))))
 }

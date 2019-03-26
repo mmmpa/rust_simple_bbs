@@ -5,6 +5,8 @@ use crate::data_gateway::DataGateway;
 use self::iron::method::Method;
 use crate::route_action::RouteAction;
 use self::iron::prelude::Iron;
+use iron::Chain;
+use crate::middleware::{Cors, Logger};
 
 pub struct Server {}
 
@@ -26,7 +28,11 @@ impl Server {
         router.add_route(Method::Post, "create thread", "api/b/:board_id/t", RouteAction::create_thread);
         router.add_route(Method::Post, "create message", "api/b/:board_id/t/:thread_id/m", RouteAction::create_message);
 
-        Iron::new(router).http(format!("localhost:{}", port)).unwrap();
-        println!("On 3000");
+        let mut chain = Chain::new(router);
+        chain.link_before(Logger);
+        chain.link_after(Cors);
+        chain.link_after(Logger);
+
+        Iron::new(chain).http(format!("localhost:{}", port)).unwrap();
     }
 }

@@ -16,6 +16,7 @@ mod router;
 mod url_separation;
 mod common_error;
 mod to_json;
+mod middleware;
 
 #[cfg(test)]
 mod e2e_test;

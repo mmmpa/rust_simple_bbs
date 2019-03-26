@@ -4,13 +4,14 @@ use serde::{Deserialize, Serialize};
 
 use std::fmt;
 use std::error::Error;
+use std::mem::replace;
 
 pub type BoxedError = Box<CommonError>;
 
 #[derive(Debug)]
 pub struct CommonError {
     details: String,
-    stacking: HashMap<String, Vec<String>>
+    pub stacking: HashMap<String, Vec<String>>
 }
 
 impl CommonError {
