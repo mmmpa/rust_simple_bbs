@@ -2,8 +2,6 @@ const path = require('path');
 
 const {
   MODE = 'development',
-  BUILD_ENV = 'development',
-  APP_ENV = 'development',
   DEV_SERVER_PORT = 9002,
 } = process.env;
 
@@ -16,7 +14,7 @@ const entry = {
 };
 
 const output = { path: path.resolve(__dirname, '../dist'), filename: '[name].js' };
-const resolve = { extensions: [".ts", ".tsx", ".js"] };
+const resolve = { extensions: ['.ts', '.tsx', '.js'] };
 const modules = {
   rules: [
     {
@@ -31,19 +29,19 @@ const modules = {
       use: {
         loader: 'babel-loader',
         options: {
-          presets: [["@babel/preset-env", { targets: { ie: 11 } }]],
+          presets: [['@babel/preset-env', { targets: { ie: 11 } }]],
           plugins: [
-            "@babel/plugin-proposal-class-properties",
+            '@babel/plugin-proposal-class-properties',
             [
-              "@babel/plugin-transform-runtime",
+              '@babel/plugin-transform-runtime',
               {
-                "corejs": false,
-                "helpers": true,
-                "regenerator": true,
-                "useESModules": false,
+                'corejs': false,
+                'helpers': true,
+                'regenerator': true,
+                'useESModules': false,
               },
             ],
-            ["@babel/plugin-transform-react-jsx", { "pragma": "h" }],
+            ['@babel/plugin-transform-react-jsx', { 'pragma': 'h' }],
           ],
         },
       },
@@ -111,13 +109,13 @@ if (isBuildMode) {
 }
 
 module.exports = {
-  mode,
-  entry,
-  output,
-  resolve,
-  plugins,
-  module: modules,
   devtool,
+  entry,
+  mode,
+  module: modules,
+  output,
+  plugins,
+  resolve,
 
   ...addOns,
 };

@@ -1,12 +1,12 @@
-import * as React from 'react';
+import React from 'react';
 import * as ReactDOM from 'react-dom';
-import createApp from './createApp';
 import './index.styles.sass';
 import createApi from './clientSideApi';
-import createRoutes from './createRoutes';
+import createApp from './createApp';
 import createHistory from './createHistory';
-import Registry from './Registry';
+import createRoutes from './createRoutes';
 import createStore from './store';
+import Registry from './Registry';
 
 function start (window): void {
   const store = createStore();
@@ -14,10 +14,10 @@ function start (window): void {
   const { pathname } = window.location;
   const history = createHistory({ window, routes, pathname });
 
-  Registry.routes = routes;
-  Registry.store = store;
   Registry.api = createApi();
   Registry.history = history;
+  Registry.routes = routes;
+  Registry.store = store;
 
   const App = createApp({
     history,

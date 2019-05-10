@@ -1,5 +1,4 @@
-import { FormEvent } from 'react';
-import * as React from 'react';
+import React, { FormEvent } from 'react';
 import { connect } from 'react-redux';
 import { useCodemirror } from '../libs/codemirrorHelpers';
 import { createMessage, updateMessage } from '../store/actions';

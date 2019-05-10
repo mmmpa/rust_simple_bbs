@@ -1,6 +1,6 @@
-import * as React from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
-import * as pathToRegexp from 'path-to-regexp';
+import pathToRegexp from 'path-to-regexp';
 import LandingPage from './components/LandingPage';
 import ThreadBody from './components/ThreadBody';
 import ThreadCreation from './components/ThreadCreation';

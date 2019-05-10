@@ -1,31 +1,140 @@
+function kv (v, keys) {
+  return keys.reduce((a, k) => (a[k] = v, a), {});
+}
+
+const offs = kv('off', [
+  'camelcase',
+  'class-methods-use-this',
+  'import/extensions',
+  'import/named',
+  'import/no-cycle',
+  'import/no-named-as-default',
+  'import/no-unresolved',
+  'import/prefer-default-export',
+  'lines-between-class-members',
+  'max-len',
+  'no-alert',
+  'no-extra-bind',
+  'no-param-reassign',
+  'no-process-env',
+  'no-restricted-globals',
+  'no-return-assign',
+  'no-sequences',
+  'no-shadow',
+  'no-underscore-dangle',
+  'no-unused-expressions',
+  'object-curly-newline',
+  'prefer-arrow-callback',
+  'require-jsdoc',
+  'typescript/explicit-function-return-type',
+  'typescript/explicit-member-accessibility',
+  'typescript/member-delimiter-style',
+  'yoda',
+]);
+
+const errors = kv('error', [
+  'block-scoped-var',
+  'default-case',
+  'dot-notation',
+  'guard-for-in',
+  'no-cond-assign',
+  'no-console',
+  'no-constant-condition',
+  'no-div-regex',
+  'no-else-return',
+  'no-eq-null',
+  'no-extend-native',
+  'no-floating-decimal',
+  'no-iterator',
+  'no-loop-func',
+  'no-multi-str',
+  'no-proto',
+  'no-self-compare',
+  'no-throw-literal',
+  'no-unused-vars',
+  'radix',
+  'react-hooks/rules-of-hooks',
+  'semi',
+  'typescript/no-unused-vars',
+  'typescript/no-use-before-define',
+]);
+
+const details = {
+  'comma-dangle': [
+    'error',
+    'always-multiline',
+  ],
+  'curly': [
+    'error',
+    'all',
+  ],
+  'indent': [
+    'error', 2, {
+      'MemberExpression': 1,
+      'SwitchCase': 0,
+    },
+  ],
+  'no-multi-spaces': [
+    'error',
+    {
+      exceptions: {
+        AssignmentExpression: true,
+        ImportDeclaration: true,
+        Property: true,
+        VariableDeclarator: true,
+      },
+    },
+  ],
+  'space-before-function-paren': [
+    'error',
+    'always',
+  ],
+  'wrap-iife': [
+    'error',
+    'inside',
+  ],
+};
+
 module.exports = {
-  root: true,
   env: {
-    node: true,
     es6: true,
+    node: true,
   },
   extends: [
-    'eslint:recommended',
-    'typescript',
     'airbnb-base',
+    'eslint:recommended',
     'standard-jsx',
-  ],
-  parser: 'typescript-eslint-parser',
-  parserOptions: {
-    ecmaVersion: 6,
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
-  plugins: [
-    'no-storage',
-    'react-hooks',
+    'typescript',
   ],
   globals: {
     APP_ENV: true,
     document: true,
     window: true,
+  },
+  overrides: {
+    files: ['**/*.ts', '**/*.tsx'],
+    rules: {
+      'no-undef': 'off',
+      'no-unused-vars': 'off',
+    },
+  },
+  parser: 'typescript-eslint-parser',
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 6,
+    sourceType: 'module',
+  },
+  plugins: [
+    'no-storage',
+    'react-hooks',
+  ],
+  root: true,
+  rules: {
+    ...details,
+    ...errors,
+    ...offs,
   },
   settings: {
     'import/extensions': ['.js', '.jsx', '.ts', '.tsx'],
@@ -36,99 +145,6 @@ module.exports = {
     },
     'react': {
       'pragma': 'h',
-    },
-  },
-  rules: {
-    'lines-between-class-members': 0,
-    'import/no-named-as-default': 0,
-    'comma-dangle': [
-      'error',
-      'always-multiline',
-    ],
-    'no-cond-assign': 2,
-    'no-constant-condition': 2,
-    'no-console': 2,
-    semi: [2, 'always'],
-    'space-before-function-paren': [
-      'error',
-      'always',
-    ],
-    'block-scoped-var': 2,
-    curly: [
-      2,
-      'all',
-    ],
-    'default-case': 2,
-    'no-div-regex': 2,
-    'no-else-return': 2,
-    'no-eq-null': 2,
-    'no-floating-decimal': 2,
-    'no-multi-spaces': [
-      2,
-      {
-        exceptions: {
-          Property: true,
-          ImportDeclaration: true,
-          VariableDeclarator: true,
-          AssignmentExpression: true,
-        },
-      },
-    ],
-    'no-self-compare': 2,
-    'wrap-iife': [
-      2,
-      'inside',
-    ],
-    'react-hooks/rules-of-hooks': 'error',
-    'dot-notation': 1,
-    'guard-for-in': 1,
-    'no-extend-native': 1,
-    'no-iterator': 1,
-    'no-loop-func': 1,
-    'no-multi-str': 1,
-    'no-process-env': 0,
-    'no-proto': 1,
-    'no-throw-literal': 1,
-    'no-unused-expressions': 0,
-    radix: 1,
-    'no-alert': 0,
-    'no-extra-bind': 0,
-    yoda: 0,
-    'class-methods-use-this': 0,
-    'require-jsdoc': 0,
-    'typescript/explicit-member-accessibility': 0,
-    'typescript/member-delimiter-style': 0,
-    'no-unused-vars': 'error',
-    'typescript/no-unused-vars': 'error',
-    'typescript/no-use-before-define': 'error',
-    'import/prefer-default-export': 0,
-    'import/extensions': 0,
-    'import/no-unresolved': 0,
-    'import/no-cycle': 0,
-    'indent': [
-      'error', 2, {
-        'SwitchCase': 0,
-        'MemberExpression': 1,
-      },
-    ],
-    'no-param-reassign': 0,
-    'camelcase': 0,
-    'object-curly-newline': 0,
-    'no-underscore-dangle': 0,
-    'no-restricted-globals': 0,
-    'max-len': 0,
-    'no-return-assign': 0,
-    'no-sequences': 0,
-    'no-shadow': 0,
-    'import/named': 'off',
-    'typescript/explicit-function-return-type': 'off',
-    'prefer-arrow-callback': 'off'
-  },
-  overrides: {
-    files: ['**/*.ts', '**/*.tsx'],
-    rules: {
-      'no-unused-vars': 'off',
-      'no-undef': 'off',
     },
   },
 };

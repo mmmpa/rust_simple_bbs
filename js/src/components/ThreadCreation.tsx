@@ -1,5 +1,4 @@
-import { FormEvent } from 'react';
-import * as React from 'react';
+import React, { FormEvent } from 'react';
 import { connect } from 'react-redux';
 import { useCodemirror } from '../libs/codemirrorHelpers';
 import { createThread, updateThread } from '../store/actions';
@@ -22,7 +21,7 @@ export default connect(
     createThread();
   }
 
-  const events = { change: e => updateThread({ ...threadParams, message: e.doc.getValue() }) };
+  const events = { change: e => updateThread({ message: e.doc.getValue() }) };
   const setView = useCodemirror({ value: message, events, width: '100%' });
 
   return (
@@ -34,7 +33,7 @@ export default connect(
           <input
             type='text'
             value={title}
-            onChange={e => updateThread({ ...threadParams, title: e.target.value })}
+            onChange={e => updateThread({ title: e.target.value })}
           />
         </div>
         <div className='new_thread__message'>

@@ -1,33 +1,33 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "sourceMap": true,
-    "jsx": "react",
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
-    "noImplicitThis": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
-    "strictNullChecks": true,
-    "noImplicitAny": false,
-    "noUnusedLocals": true,
-    "typeRoots": [
-      "./src/types",
-      "./node_modules/@types",
-      "../../preact-router/src"
-    ],
+    "jsx": "react",
     "lib": [
       "dom",
-      "es5",
       "es2015.promise",
-      "es2017"
+      "es2017",
+      "es6"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "target": "es5",
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
     ]
   },
+  "exclude": [
+    "node_modules"
+  ],
   "include": [
     "./src/**/*.ts",
     "./src/**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
   ]
 }
